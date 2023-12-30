@@ -4,13 +4,9 @@
 #include <sstream>
 #include <vector>
 #include <filesystem>
+#include "Card.h"
 
 using namespace std;
-
-struct Card {
-    string value;
-    int quantity;
-};
 
 int main() {
     vector<Card> cards;
