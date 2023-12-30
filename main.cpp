@@ -5,34 +5,36 @@
 #include <vector>
 #include <filesystem>
 
+using namespace std;
+
 struct Card {
-    std::string value;
+    string value;
     int quantity;
 };
 
 int main() {
-    std::vector<Card> cards;
-    std::string line;
+    vector<Card> cards;
+    string line;
 
-    std::filesystem::path currentPath = std::filesystem::current_path();
-    std::filesystem::path fullPath = currentPath.parent_path() / "balicek.txt";
-    std::string fullPathStr = fullPath.string();
-    std::cout << fullPathStr << std::endl;
+    filesystem::path currentPath = filesystem::current_path();
+    filesystem::path fullPath = currentPath.parent_path() / "balicek.txt";
+    string fullPathStr = fullPath.string();
+    cout << fullPathStr << endl;
 
 
-    std::ifstream file(fullPathStr);
+    ifstream file(fullPathStr);
 
 
     if (!file.is_open()) {
-        std::cerr << "Error opening file" << std::endl;
+        cerr << "Error opening file" << endl;
         return 1;
     }
 
     while (getline(file, line)) {
-        std::stringstream ss(line);
-        std::string token;
+        stringstream ss(line);
+        string token;
         int quantity;
-        std::string value;
+        string value;
 
 
         getline(ss, token, ',');
@@ -49,7 +51,7 @@ int main() {
 
 
     for (const auto& card : cards) {
-        std::cout << "Value: " << card.value << ", Quantity: " << card.quantity << std::endl;
+        cout << "Value: " << card.value << ", Quantity: " << card.quantity << endl;
     }
 
 
