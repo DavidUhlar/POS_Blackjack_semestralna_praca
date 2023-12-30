@@ -41,7 +41,7 @@ int main() {
         getline(ss, token, ',');
         number = token;
         getline(ss, token);
-        value = std::stoi(token);
+        value = stoi(token);
 
 
         cards.push_back({symbol, number, value});
@@ -50,13 +50,23 @@ int main() {
 
 
     for (auto& card : cards) {
-        cout << "symbol: " << card.getSymbol() << ", Quantity: " << card.getNumber() <<  ", value: " << card.getValue() << endl;
+        if (card.getSymbol() == "S") {
+            cout << "symbol: \u2660 , Number: " << card.getNumber() <<  ", value: " << card.getValue() << endl;
+        } else if (card.getSymbol() == "H") {
+            cout << "symbol: \u2665 , Number: " << card.getNumber() <<  ", value: " << card.getValue() << endl;
+        } else if (card.getSymbol() == "D") {
+            cout << "symbol: \u2666 , Number: " << card.getNumber() <<  ", value: " << card.getValue() << endl;
+        } else if (card.getSymbol() == "C") {
+            cout << "symbol: \u2663 , Number: " << card.getNumber() <<  ", value: " << card.getValue() << endl;
+        }
+
     }
 
 
-    std::string unicodeString = u8"☺ Hello, Unicode! ✓";
 
-    std::cout << unicodeString << std::endl;
+    string unicodeString = "☺ Hello, Unicode! ✓ \u2660";
+
+    cout << unicodeString << endl;
 
 
     return 0;
