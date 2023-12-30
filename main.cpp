@@ -28,29 +28,35 @@ int main() {
 
     while (getline(file, line)) {
         stringstream ss(line);
+
         string token;
-        int quantity;
-        string value;
+        string symbol;
+        string number;
+        int value;
+
 
 
         getline(ss, token, ',');
-        value = token;
-
-
+        symbol = token;
+        getline(ss, token, ',');
+        number = token;
         getline(ss, token);
-        quantity = std::stoi(token);
+        value = std::stoi(token);
 
 
-        cards.push_back({value, quantity});
+        cards.push_back({symbol, number, value});
 
     }
 
 
-    for (const auto& card : cards) {
-        cout << "Value: " << card.value << ", Quantity: " << card.quantity << endl;
+    for (auto& card : cards) {
+        cout << "symbol: " << card.getSymbol() << ", Quantity: " << card.getNumber() <<  ", value: " << card.getValue() << endl;
     }
 
 
+    std::string unicodeString = u8"☺ Hello, Unicode! ✓";
+
+    std::cout << unicodeString << std::endl;
 
 
     return 0;

@@ -2,6 +2,8 @@
 // Created by dadod on 30.12.2023.
 //
 
+#include <string>
+
 #ifndef SEMESTRALKA_CARD_H
 #define SEMESTRALKA_CARD_H
 
@@ -12,15 +14,15 @@ class Card {
 
 
     public:
-        Card(char symbol, char number, int value);
-        char getSymbol();
-        char getNumber();
+        Card(string symbol, string number, int value);
+        string getSymbol();
+        string getNumber();
         int getValue();
         ~Card();
 
     private:
-        char symbol;
-        char number;
+        string symbol;
+        string number;
         int value;
 
 };

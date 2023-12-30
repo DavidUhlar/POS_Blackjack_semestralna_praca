@@ -4,18 +4,19 @@
 
 #include "Card.h"
 
-Card::Card(char symbol, char number, int value) {
+
+Card::Card(string symbol, string number, int value) {
     this->symbol = symbol;
     this->number = number;
     this->value = value;
 
 }
 
-char Card::getSymbol() {
+string Card::getSymbol() {
     return this->symbol;
 }
 
-char Card::getNumber() {
+string Card::getNumber() {
     return this->number;
 }
 
