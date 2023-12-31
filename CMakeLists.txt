@@ -5,4 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(semestralka main.cpp
         Card.cpp
-        Card.h)
+        GameDecks.cpp
+        Card.h
+        GameDecks.h)
