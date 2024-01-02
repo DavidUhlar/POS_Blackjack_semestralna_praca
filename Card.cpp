@@ -8,9 +8,6 @@ Card::Card(string symbol, string number, int value) {
 
 }
 
-
-
-
 int Card::getValue() {
     return this->value;
 }
@@ -20,9 +17,9 @@ Card::~Card() {
 }
 
 string Card::getSymbol() {
-    return std::string();
+    return this->symbol;
 }
 
 string Card::getNumber() {
-    return std::string();
+    return this->number;
 }

@@ -58,13 +58,13 @@ void GameDecks::loadDecks(int numOfDecks) {
 
 void GameDecks::getSizeOfDeck() {
     for (auto card : this->gameDeck) {
-        if (card->getSymbol() == "S") {
+        if (card->getSymbol().compare("S")) {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol() == "H") {
+        } else if (card->getSymbol().compare("H")) {
             cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol() == "D") {
+        } else if (card->getSymbol().compare("D")) {
             cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol() == "C") {
+        } else if (card->getSymbol().compare("C")) {
             cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
         }
 
