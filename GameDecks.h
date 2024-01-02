@@ -19,7 +19,9 @@ class GameDecks {
         GameDecks();
         void shuffleDeck();
         void loadDecks(int numOfDecks);
-        void getSizeOfDeck();
+        int getSizeOfDeck();
+
+        Card* deckPop();
         ~GameDecks();
 
     private:

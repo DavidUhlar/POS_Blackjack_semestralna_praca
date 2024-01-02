@@ -3,7 +3,7 @@
 
 
 GameDecks::GameDecks() {
-    this->gameDeck;
+
 }
 
 void GameDecks::shuffleDeck() {
@@ -56,21 +56,25 @@ void GameDecks::loadDecks(int numOfDecks) {
     }
 }
 
-void GameDecks::getSizeOfDeck() {
-    for (auto card : this->gameDeck) {
-        if (card->getSymbol().compare("S")) {
-            cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol().compare("H")) {
-            cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol().compare("D")) {
-            cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol().compare("C")) {
-            cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        }
 
-    }
+
+
+
+int GameDecks::getSizeOfDeck() {
     cout << "velkost balicka: " << this->gameDeck.size() << endl;
+    return this->gameDeck.size();
 }
+
+Card* GameDecks::deckPop() {
+    //LIFO
+    Card* lastCard = this->gameDeck.back();
+    this->gameDeck.pop_back();
+//    cout << lastCard->getSymbol() << lastCard->getNumber() << lastCard->getValue() << endl;
+    return lastCard;
+}
+
 GameDecks::~GameDecks() {
 
 }
+
+
