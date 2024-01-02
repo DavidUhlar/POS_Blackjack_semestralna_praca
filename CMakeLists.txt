@@ -11,5 +11,7 @@ add_executable(semestralka main.cpp
         Player.cpp
         Player.h
         Dealer.cpp
-        Dealer.h)
+        Dealer.h
+        House.cpp
+        House.h)
 
