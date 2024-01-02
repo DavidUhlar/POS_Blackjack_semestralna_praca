@@ -1,5 +1,38 @@
-//
-// Created by dadod on 02.01.2024.
-//
 
 #include "Player.h"
+
+Player::Player() {
+
+}
+
+void Player::hit() {
+
+}
+
+void Player::stand() {
+
+}
+
+void Player::doubleDown() {
+
+}
+
+void Player::split() {
+
+}
+
+void Player::surrender() {
+
+}
+
+void Player::updateBalance() {
+
+}
+
+int Player::getBalance() {
+
+}
+
+Player::~Player() {
+
+}

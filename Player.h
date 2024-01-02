@@ -1,19 +1,28 @@
-//
-// Created by dadod on 02.01.2024.
-//
+
+
+#include "Card.h"
+#include <vector>
+
 
 #ifndef SEMESTRALKA_PLAYER_H
 #define SEMESTRALKA_PLAYER_H
 
 
-class Player {
-    public:
-        Player();
+public:
+    Player();
+    void hit();
+    void stand();
+    void doubleDown();
+    void split();
+    void surrender();
+    void updateBalance();
+    int getBalance();
+    ~Player();
 
-        ~Player();
+private:
+    vector<Card*> hand;
+    int balance;
 
-    private:
-        int balance;
 
 };
 

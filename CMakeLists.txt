@@ -12,3 +12,4 @@ add_executable(semestralka main.cpp
         Player.h
         Dealer.cpp
         Dealer.h)
+
