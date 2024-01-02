@@ -1,6 +1,6 @@
-//
-// Created by dadod on 02.01.2024.
-//
+#include "Card.h"
+#include "GameDecks.h"
+
 
 #ifndef SEMESTRALKA_DEALER_H
 #define SEMESTRALKA_DEALER_H
@@ -8,12 +8,20 @@
 
 class Dealer {
     public:
-        Dealer();
-
+        Dealer(int numberOfDecks);
+        Card* handOutCard();
+        void addCard(Card* card);
+        void printDeck(bool showFirstCard);
+        int getGameDeckSize();
+        bool hit();
+        int calculateValueOfHand();
         ~Dealer();
 
     private:
         int balance;
+        vector<Card*> dealerHand;
+        GameDecks gameDecks;
+        int valueOfHand;
 
 
 };
