@@ -1,11 +1,12 @@
+
+
 #include "Card.h"
 #include <vector>
+
 
 #ifndef SEMESTRALKA_PLAYER_H
 #define SEMESTRALKA_PLAYER_H
 
-
-class Player {
 
 public:
     Player();
@@ -20,6 +21,8 @@ public:
 
 private:
     vector<Card*> hand;
+    int balance;
+
 
 };
 

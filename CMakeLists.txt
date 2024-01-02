@@ -9,4 +9,7 @@ add_executable(semestralka main.cpp
         Card.h
         GameDecks.h
         Player.cpp
-        Player.h)
+        Player.h
+        Dealer.cpp
+        Dealer.h)
+
