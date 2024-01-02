@@ -1,6 +1,6 @@
 #include "Card.h"
 #include "GameDecks.h"
-#include "House.h"
+
 
 #ifndef SEMESTRALKA_DEALER_H
 #define SEMESTRALKA_DEALER_H
@@ -9,19 +9,19 @@
 class Dealer {
     public:
         Dealer(int numberOfDecks);
-
-    Dealer();
-
-    Card* handOutCard();
+        Card* handOutCard();
         void addCard(Card* card);
-        void printDeck(int rounds);
+        void printDeck(bool showFirstCard);
         int getGameDeckSize();
+        bool hit();
+        int calculateValueOfHand();
         ~Dealer();
 
     private:
         int balance;
         vector<Card*> dealerHand;
         GameDecks gameDecks;
+        int valueOfHand;
 
 
 };
