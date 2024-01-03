@@ -9,23 +9,30 @@
 
 class Player {
 public:
-    Player();
+    Player(string name, int balance);
     bool hit();
-    bool stand();
     bool doubleDown();
     bool split();
     bool surrender();
-    void updateBalance();
+    void updateBalance(int balanceUpdate);
     int getBalance();
     void addCard(Card* card);
     void removeCards();
     void printDeck();
+    int calculateValueOfHand();
+    string getName();
+    bool isBust();
+    void setBust(bool value);
+    int getDeposit();
+    bool setDeposit(int newDeposit);
     ~Player();
 
 private:
     vector<Card*> hand;
     int balance;
-
+    int deposit;
+    string name;
+    bool bust;
 
 };
 

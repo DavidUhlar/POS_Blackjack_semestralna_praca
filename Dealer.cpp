@@ -75,27 +75,14 @@ int Dealer::getGameDeckSize() {
 
 
 
-bool Dealer::hit() {
-
-    if (this->calculateValueOfHand() < 17) {
-        this->addCard(this->handOutCard());
-        cout << "hitujeme vonku deal" << endl;
-    } else {
-        cout << "standujeme vonku deal" << endl;
-    }
-
-    if (this->calculateValueOfHand() < 17) {
-        return true;
-
-    } else {
-        return false;
-    }
+void Dealer::hit() {
+    this->addCard(this->handOutCard());
 }
 
 int Dealer::calculateValueOfHand() {
     this->valueOfHand = 0;
 
-    for (auto card : this->dealerHand) {
+    for (auto& card : this->dealerHand) {
         this->valueOfHand += card->getValue();
     }
 

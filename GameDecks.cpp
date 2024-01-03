@@ -61,7 +61,6 @@ void GameDecks::loadDecks(int numOfDecks) {
 
 
 int GameDecks::getSizeOfDeck() {
-    cout << "velkost balicka: " << this->gameDeck.size() << endl;
     return this->gameDeck.size();
 }
 

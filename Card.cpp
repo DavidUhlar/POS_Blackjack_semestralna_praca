@@ -12,9 +12,7 @@ int Card::getValue() {
     return this->value;
 }
 
-Card::~Card() {
 
-}
 
 string Card::getSymbol() {
     return this->symbol;
@@ -23,3 +21,14 @@ string Card::getSymbol() {
 string Card::getNumber() {
     return this->number;
 }
+
+
+void Card::setValue(int newValue) {
+    this->value = newValue;
+}
+
+
+Card::~Card() {
+
+}
+

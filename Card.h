@@ -15,6 +15,7 @@ class Card {
         string getSymbol();
         string getNumber();
         int getValue();
+        void setValue(int newValue);
         ~Card();
 
     private:

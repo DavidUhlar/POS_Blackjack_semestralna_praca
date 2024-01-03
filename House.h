@@ -18,6 +18,8 @@ public:
     int getNoRound();
     void round();
     void pushPlayer(Player player);
+    void getWinner(bool dealerWin);
+    void makeDeposit();
     ~House();
 private:
     Dealer dealer;

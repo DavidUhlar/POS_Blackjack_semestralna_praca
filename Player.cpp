@@ -1,17 +1,19 @@
 
 #include "Player.h"
 
-Player::Player() {
-
+Player::Player(string name, int balance) {
+    this->name = name;
+    this->bust = false;
+    this->balance = balance;
 }
 
 bool Player::hit() {
+    if (calculateValueOfHand() >= 21) {
+        return false;
+    }
     return true;
 }
 
-bool Player::stand() {
-    return true;
-}
 
 bool Player::doubleDown() {
     return true;
@@ -25,12 +27,12 @@ bool Player::surrender() {
     return true;
 }
 
-void Player::updateBalance() {
-
+void Player::updateBalance(int balanceUpdate) {
+    this->balance += balanceUpdate;
 }
 
 int Player::getBalance() {
-    return 1;
+    return this->balance;
 }
 
 void Player::addCard(Card* card) {
@@ -38,13 +40,13 @@ void Player::addCard(Card* card) {
 }
 
 void Player::removeCards() {
-    hand.clear();
+    this->hand.clear();
 }
 void Player::printDeck() {
-    int valueOfHand = 0;
+
 
     cout << "\n " << endl;
-    cout << "Player: " << endl;
+    cout << "Player " << this->name << ": " << endl;
     for (auto card : this->hand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
@@ -55,13 +57,50 @@ void Player::printDeck() {
         } else if (card->getSymbol() == "C") {
             cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
         }
-        valueOfHand += card->getValue();
+
     }
-    cout << "Value of players hand: " << valueOfHand << endl;
+    cout << "Value of players hand: " << calculateValueOfHand() << endl;
 }
 
+int Player::calculateValueOfHand() {
+    int valueOfHand = 0;
 
+    for (auto card : this->hand) {
+        valueOfHand += card->getValue();
+    }
+    return valueOfHand;
+}
+
+string Player::getName() {
+    return this->name;
+}
+
+bool Player::isBust() {
+    return this->bust;
+}
+
+void Player::setBust(bool value) {
+    this->bust = value;
+}
+
+int Player::getDeposit() {
+    return this->deposit;
+}
+
+bool Player::setDeposit(int newDeposit) {
+    if ((this->balance - newDeposit >= 0) && (newDeposit > 0)) {
+        this->deposit = newDeposit;
+        this->balance -= this->deposit;
+        return true;
+    } else {
+        return false;
+    }
+
+}
 
 Player::~Player() {
 
 }
+
+
+

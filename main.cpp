@@ -12,7 +12,8 @@ int main() {
 
 
 
-    house.pushPlayer(Player());
+    house.pushPlayer(Player("Regina", 100));
+    house.pushPlayer(Player("Clang", 20));
     house.round();
 
 

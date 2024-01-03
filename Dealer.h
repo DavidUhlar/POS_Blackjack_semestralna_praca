@@ -13,7 +13,7 @@ class Dealer {
         void addCard(Card* card);
         void printDeck(bool showFirstCard);
         int getGameDeckSize();
-        bool hit();
+        void hit();
         int calculateValueOfHand();
         ~Dealer();
 
