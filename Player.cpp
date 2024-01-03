@@ -33,19 +33,19 @@ int Player::getBalance() {
     return 1;
 }
 
-void Player::addCard(Card* card) {
-    this->hand.push_back(card);
+void Player::addCard(std::unique_ptr<Card> card) {
+    hand.push_back(std::move(card));
 }
 
 void Player::removeCards() {
-    hand.clear();
+    this->hand.clear();
 }
 void Player::printDeck() {
     int valueOfHand = 0;
 
     cout << "\n " << endl;
     cout << "Player: " << endl;
-    for (auto card : this->hand) {
+    for (auto& card : this->hand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
         } else if (card->getSymbol() == "H") {

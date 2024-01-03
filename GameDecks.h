@@ -21,11 +21,11 @@ class GameDecks {
         void loadDecks(int numOfDecks);
         int getSizeOfDeck();
 
-        Card* deckPop();
+    std::unique_ptr<Card>  deckPop();
         ~GameDecks();
 
     private:
-        vector<Card*> gameDeck;
+    std::vector<std::unique_ptr<Card>> gameDeck;
 
 };
 

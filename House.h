@@ -17,11 +17,11 @@ public:
     void handingOutCards();
     int getNoRound();
     void round();
-    void pushPlayer(Player player);
+    void pushPlayer(std::unique_ptr<Player> player);
     ~House();
 private:
     Dealer dealer;
-    vector<Player> listOfPlayers;
+    std::vector<std::unique_ptr<Player>> listOfPlayers;
     int numberOfRound;
 };
 

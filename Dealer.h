@@ -9,8 +9,8 @@
 class Dealer {
     public:
         Dealer(int numberOfDecks);
-        Card* handOutCard();
-        void addCard(Card* card);
+        std::unique_ptr<Card>  handOutCard();
+        void addCard(std::unique_ptr<Card> card);
         void printDeck(bool showFirstCard);
         int getGameDeckSize();
         bool hit();
@@ -19,7 +19,7 @@ class Dealer {
 
     private:
         int balance;
-        vector<Card*> dealerHand;
+        std::vector<std::unique_ptr<Card>> dealerHand;
         GameDecks gameDecks;
         int valueOfHand;
 
