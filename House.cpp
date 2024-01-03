@@ -10,6 +10,10 @@ void House::giveCard(Player& currentPlayer) {
     currentPlayer.addCard(this->dealer.handOutCard());
 }
 
+void House::giveCardSplit(Player& currentPlayer) {
+    currentPlayer.addCardSplit(this->dealer.handOutCard());
+}
+
 void House::handingOutCards() {
 
     for (int i = 0; i < 2; ++i) {
@@ -31,11 +35,19 @@ void House::round() {
     cout << "velkost balicka: " << this->dealer.getGameDeckSize() << endl;
     this->makeDeposit();
 
+    int countBustSplitSize = 0;
+    int countBustSplit = 0;
+
+    cout << "" << endl;
+    cout << "" << endl;
+    cout << "----------TABLE-----------" << endl;
     if (this->dealer.getGameDeckSize() >= 60) {
         this->handingOutCards();
         this->dealer.printDeck(false);
         for (auto& player: listOfPlayers) {
-            player.setBust(false);
+            player.setBust(false, true);
+            player.setBust(false, false);
+            player.setFirstMove(false);
             player.printDeck();
         }
         this->numberOfRound++;
@@ -57,8 +69,13 @@ void House::round() {
 
 
     for (auto& player: listOfPlayers) {
+        cout << "" << endl;
+        cout << "Player: " << player.getName() << endl;
+
         string in;
+        string inSplit;
         koniec = false;
+
 
         while (!koniec)
         {
@@ -71,16 +88,27 @@ void House::round() {
                 break;
             }
 
-            cout << "hit/stand " << endl;
+
+            if (!player.getFirstMove()) {
+                if (player.isSplitable()) {
+                    cout << "hit/stand/surrender/split/doubleDown " << endl;
+                } else {
+                    cout << "hit/stand/surrender/doubleDown " << endl;
+                }
+
+            } else {
+                cout << "hit/stand " << endl;
+            }
+
             cin >> in;
 
             if (in == "hit") {
-                if (player.hit()) {
+                if (player.hit(false)) {
                     this->giveCard(player);
                 }
                 if (player.calculateValueOfHand() > 21) {
 
-                    player.setBust(true);
+                    player.setBust(true, false);
                     cout << "bust " << endl;
                     koniec = true;
                 } else if (player.calculateValueOfHand() == 21){
@@ -91,9 +119,73 @@ void House::round() {
                 koniec = true;
             } else if (in == "kys") {
                 koniec = true;
-            }
-            else {
+            } else if (in == "split" && !player.getFirstMove() && player.isSplitable()) {
+
+                player.split();
+                countBustSplitSize++;
+                bool koniecNormal = false;
+                while (!koniecNormal)
+                {
+                    cout << "hand 1 " << endl;
+                    player.printDeck();
+                    cout << "hit/stand " << endl;
+
+                    cin >> inSplit;
+                    if (inSplit == "hit") {
+                        if (player.hit(false)) {
+                            this->giveCard(player);
+                        }
+                        if (player.calculateValueOfHand() > 21) {
+
+                            player.setBust(true, false);
+                            cout << "bust " << endl;
+                            koniecNormal = true;
+                        } else if (player.calculateValueOfHand() == 21){
+                            cout << "win " << endl;
+                            koniecNormal = true;
+                        }
+                    } else if (inSplit == "stand") {
+                        koniecNormal = true;
+                    }
+                }
+
+
+                bool koniecSplit = false;
+                while (!koniecSplit)
+                {
+                    cout << "hand 2 " << endl;
+                    player.printDeckSplit();
+                    cout << "hit/stand " << endl;
+
+                    cin >> inSplit;
+                    if (inSplit == "hit") {
+                        if (player.hit(true)) {
+                            this->giveCardSplit(player);
+                        }
+                        if (player.calculateValueOfHandSplit() > 21) {
+
+                            player.setBust(true, true);
+                            cout << "bust " << endl;
+                            koniecSplit = true;
+                        } else if (player.calculateValueOfHandSplit() == 21){
+                            cout << "win " << endl;
+                            koniecSplit = true;
+                        }
+                    } else if (inSplit == "stand") {
+                        koniecSplit = true;
+                    }
+                }
+                koniec = true;
+            } else if (in == "surrender" && !player.getFirstMove()) {
+                player.surrender();
+                koniec = true;
+
+            } else {
                 cout << "wrong input " << endl;
+            }
+
+            if (!player.getFirstMove()) {
+                player.setFirstMove(true);
             }
 
         }
@@ -105,10 +197,21 @@ void House::round() {
 
     int countBust = 0;
     for (auto& player: listOfPlayers) {
-        if (player.isBust()) {
+        if (player.isBust(false)) {
             countBust++;
         }
+
+        if (player.isBust(true)) {
+            countBustSplit++;
+        }
+
     }
+
+
+    if ((countBustSplit == countBustSplitSize) && (countBustSplitSize > 0)) {
+        cout << "DEALER WINS after split " << endl;
+    }
+
 
     if (countBust == listOfPlayers.size()) {
         cout << "DEALER WINS" << endl;
@@ -117,8 +220,13 @@ void House::round() {
             bool dealerWin = true;
             this->dealer.printDeck(true);
             for (auto& player: listOfPlayers) {
-                if (this->dealer.calculateValueOfHand() < player.calculateValueOfHand() && !player.isBust()) {
+                if (this->dealer.calculateValueOfHand() < player.calculateValueOfHand() && !player.isBust(false)) {
                     dealerWin = false;
+                }
+                if (player.getIsHandSplit()) {
+                    if (this->dealer.calculateValueOfHand() < player.calculateValueOfHandSplit() && !player.isBust(true)) {
+                        dealerWin = false;
+                    }
                 }
             }
 
@@ -131,7 +239,7 @@ void House::round() {
             this->dealer.printDeck(true);
         }
     }
-    cout << "je koniec gamesky" << endl;
+    cout << "end of game" << endl;
 
     this->getWinner(false);
 
@@ -153,13 +261,20 @@ void House::getWinner(bool dealerWin) {
     this->dealer.printDeck(true);
     for (auto& player: listOfPlayers) {
         player.printDeck();
+
+        if (player.getIsHandSplit()) {
+            player.printDeckSplit();
+        }
     }
 
     cout << "" << endl;
     cout << "--------WINNERS---------" << endl;
     if (!dealerWin) {
         for (auto& player: listOfPlayers) {
-            if (player.calculateValueOfHand() > this->dealer.calculateValueOfHand() && !player.isBust()) {
+            if (player.getIsHandSplit()) {
+                cout << "Hand 1: " << endl;
+            }
+            if (player.calculateValueOfHand() > this->dealer.calculateValueOfHand() && !player.isBust(false)) {
                 cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                 cout <<  "Total win: " << (player.getDeposit()*2) << endl;
 
@@ -167,14 +282,14 @@ void House::getWinner(bool dealerWin) {
 
                 cout <<  "Total balance: " << (player.getBalance()) << endl;
 
-                player.setDeposit(0);
-            } else if (player.calculateValueOfHand() == this->dealer.calculateValueOfHand() && !player.isBust()) {
+
+            } else if (player.calculateValueOfHand() == this->dealer.calculateValueOfHand() && !player.isBust(false)) {
                 cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
                 cout <<  "Total win: " << (player.getDeposit()) << endl;
                 player.updateBalance(player.getDeposit());
                 cout <<  "Total balance: " << (player.getBalance()) << endl;
-                player.setDeposit(0);
-            } else if (this->dealer.calculateValueOfHand() > 21) {
+
+            } else if (this->dealer.calculateValueOfHand() > 21 && !player.isBust(false)) {
                 cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                 cout <<  "Total win: " << (player.getDeposit()*2) << endl;
 
@@ -182,15 +297,54 @@ void House::getWinner(bool dealerWin) {
 
                 cout <<  "Total balance: " << (player.getBalance()) << endl;
 
-                player.setDeposit(0);
-            } else {
-                player.setDeposit(0);
+
             }
+
+            //pre split
+
+            if (player.getIsHandSplit()) {
+
+                if (player.calculateValueOfHandSplit() > this->dealer.calculateValueOfHand() && !player.isBust(true)) {
+                    cout << "Hand 2: " << endl;
+                    cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
+                    cout <<  "Total win: " << (player.getDeposit()*2) << endl;
+
+                    player.updateBalance(player.getDeposit()*2);
+
+                    cout <<  "Total balance: " << (player.getBalance()) << endl;
+
+
+                } else if (player.calculateValueOfHandSplit() == this->dealer.calculateValueOfHand() && !player.isBust(true)) {
+                    cout << "Hand 2: " << endl;
+                    cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
+                    cout <<  "Total win: " << (player.getDeposit()) << endl;
+                    player.updateBalance(player.getDeposit());
+                    cout <<  "Total balance: " << (player.getBalance()) << endl;
+
+                } else if (this->dealer.calculateValueOfHand() > 21 && !player.isBust(true)) {
+                    cout << "Hand 2: " << endl;
+                    cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
+                    cout <<  "Total win: " << (player.getDeposit()*2) << endl;
+
+                    player.updateBalance(player.getDeposit()*2);
+
+                    cout <<  "Total balance: " << (player.getBalance()) << endl;
+
+
+                }
+            }
+            player.setDeposit(0);
+
             cout << "" << endl;
         }
     } else {
         cout << "DEALER WINS" << endl;
     }
+
+    for (auto& player: listOfPlayers) {
+        player.removeCards();
+    }
+    this->dealer.removeCards();
 }
 
 
@@ -201,20 +355,30 @@ void House::makeDeposit() {
         while (!koniec) {
             cout << " " << endl;
             cout << "Player: " << player.getName() << endl;
-            cout << "Select deposit (balance: " << player.getBalance() << "): " << endl;
+            cout << "Select deposit(10/20/100) (balance: " << player.getBalance() << "): " << endl;
+            cout << "Leave with: leave " << endl;
 
             try {
                 cin >> in;
 
-                if (in == "koniec") {
+                if (in == "leave") {
                     koniec = true;
                 }
 
                 int deposit = stoi(in);
-                if (player.setDeposit(deposit)) {
-                    koniec = true;
+
+                if (deposit == 10 || deposit == 20 || deposit == 100) {
+                    if (deposit <= player.getBalance()) {
+                        if (player.setDeposit(deposit)) {
+                            koniec = true;
+                        } else {
+                            cout << "wrong input " << endl;
+                        }
+                    } else {
+                        cout << "not enough tokens on account " << endl;
+                    }
                 } else {
-                    cout << "wrong input " << endl;
+                    cout << "House only accepts 10/20/100 tokens " << endl;
                 }
             } catch (const exception& e) {
                 cout << "wrong input " << endl;

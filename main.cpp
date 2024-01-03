@@ -12,9 +12,12 @@ int main() {
 
 
 
-    house.pushPlayer(Player("Regina", 100));
-    house.pushPlayer(Player("Clang", 20));
-    house.round();
+    house.pushPlayer(Player("Regina", 1000));
+    house.pushPlayer(Player("Clang", 1000));
+    for (int i = 0; i < 2; ++i) {
+        house.round();
+    }
+
 
 
 

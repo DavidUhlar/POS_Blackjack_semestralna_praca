@@ -15,10 +15,11 @@ class Dealer {
         int getGameDeckSize();
         void hit();
         int calculateValueOfHand();
+        void aceChange();
+        void removeCards();
         ~Dealer();
 
     private:
-        int balance;
         vector<Card*> dealerHand;
         GameDecks gameDecks;
         int valueOfHand;

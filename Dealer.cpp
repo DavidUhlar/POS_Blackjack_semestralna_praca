@@ -14,6 +14,7 @@ Card *Dealer::handOutCard() {
 
 void Dealer::addCard(Card *card) {
     this->dealerHand.push_back(card);
+    this->aceChange();
 }
 
 void Dealer::printDeck(bool showFirstCard) {
@@ -90,7 +91,30 @@ int Dealer::calculateValueOfHand() {
     return this->valueOfHand;
 }
 
+void Dealer::aceChange() {
+    if (this->calculateValueOfHand() > 21) {
+        for (auto card : this->dealerHand) {
+            if (this->calculateValueOfHand() > 21) {
+                if ((card->getNumber() == "A") && (card->getValue() == 11)) {
+                    card->setValue(1);
+                }
+            }
+
+        }
+    }
+
+    this->calculateValueOfHand();
+}
+
+void Dealer::removeCards() {
+    this->dealerHand.clear();
+    this->valueOfHand = 0;
+
+}
 
 Dealer::~Dealer() {
 
 }
+
+
+

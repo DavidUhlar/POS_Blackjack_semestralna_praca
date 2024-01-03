@@ -10,21 +10,29 @@
 class Player {
 public:
     Player(string name, int balance);
-    bool hit();
+    bool hit(bool isSplit);
     bool doubleDown();
-    bool split();
-    bool surrender();
+    bool isSplitable();
+    void split();
+    void surrender();
     void updateBalance(int balanceUpdate);
     int getBalance();
     void addCard(Card* card);
+    void addCardSplit(Card* card);
     void removeCards();
     void printDeck();
+    void printDeckSplit();
     int calculateValueOfHand();
+    int calculateValueOfHandSplit();
     string getName();
-    bool isBust();
-    void setBust(bool value);
+    bool isBust(bool isSplit);
+    void setBust(bool value, bool isSplit);
     int getDeposit();
     bool setDeposit(int newDeposit);
+    void aceChange(bool isSplit);
+    bool getFirstMove();
+    void setFirstMove(bool newFirstMove);
+    bool getIsHandSplit();
     ~Player();
 
 private:
@@ -33,6 +41,11 @@ private:
     int deposit;
     string name;
     bool bust;
+    bool bustSplit;
+    vector<Card*> splitHand;
+    bool firstMove;
+    bool isHandSplit;
+
 
 };
 
