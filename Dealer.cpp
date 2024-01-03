@@ -16,31 +16,93 @@ void Dealer::addCard(Card *card) {
     this->dealerHand.push_back(card);
 }
 
-void Dealer::printDeck(int rounds) {
-    int valueOfHand = 0;
-    int index = 0;
-    cout << "rounds: " << rounds << endl;
-    for (auto card : this->dealerHand) {
-//        if (index == 0 && rounds == )
+void Dealer::printDeck(bool showFirstCard) {
 
-        if (card->getSymbol() == "S") {
-            cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol() == "H") {
-            cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol() == "D") {
-            cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-        } else if (card->getSymbol() == "C") {
-            cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+    int index = 0;
+
+    cout << "\n " << endl;
+    cout << "Dealer: " << endl;
+
+
+
+    this->calculateValueOfHand();
+
+    for (auto card : this->dealerHand) {
+        if (showFirstCard) {
+
+            if (card->getSymbol() == "S") {
+                cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+            } else if (card->getSymbol() == "H") {
+                cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+            } else if (card->getSymbol() == "D") {
+                cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+            } else if (card->getSymbol() == "C") {
+                cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+            }
+
+
+        } else {
+
+            if (index == 0) {
+                cout << "tajnô karta " << endl;
+            } else {
+                if (card->getSymbol() == "S") {
+                    cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                } else if (card->getSymbol() == "H") {
+                    cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                } else if (card->getSymbol() == "D") {
+                    cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                } else if (card->getSymbol() == "C") {
+                    cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                }
+            }
         }
-        valueOfHand += card->getValue();
+
         index++;
+
     }
-    cout << "Value of hand: " << valueOfHand << endl;
+    if (showFirstCard) {
+        cout << "Value of dealers hand: " << valueOfHand << endl;
+    }
+
 }
+
+
 
 int Dealer::getGameDeckSize() {
     return this->gameDecks.getSizeOfDeck();
 }
+
+
+
+bool Dealer::hit() {
+
+    if (this->calculateValueOfHand() < 17) {
+        this->addCard(this->handOutCard());
+        cout << "hitujeme vonku deal" << endl;
+    } else {
+        cout << "standujeme vonku deal" << endl;
+    }
+
+    if (this->calculateValueOfHand() < 17) {
+        return true;
+
+    } else {
+        return false;
+    }
+}
+
+int Dealer::calculateValueOfHand() {
+    this->valueOfHand = 0;
+
+    for (auto card : this->dealerHand) {
+        this->valueOfHand += card->getValue();
+    }
+
+
+    return this->valueOfHand;
+}
+
 
 Dealer::~Dealer() {
 

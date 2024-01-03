@@ -42,6 +42,9 @@ void Player::removeCards() {
 }
 void Player::printDeck() {
     int valueOfHand = 0;
+
+    cout << "\n " << endl;
+    cout << "Player: " << endl;
     for (auto card : this->hand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
@@ -54,7 +57,7 @@ void Player::printDeck() {
         }
         valueOfHand += card->getValue();
     }
-    cout << "Value of hand: " << valueOfHand << endl;
+    cout << "Value of players hand: " << valueOfHand << endl;
 }
 
 

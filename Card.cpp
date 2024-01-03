@@ -8,9 +8,6 @@ Card::Card(string symbol, string number, int value) {
 
 }
 
-
-
-
 int Card::getValue() {
     return this->value;
 }

@@ -12,11 +12,9 @@ int main() {
 
 
 
-
-
-
     house.pushPlayer(Player());
     house.round();
+
 
 
 

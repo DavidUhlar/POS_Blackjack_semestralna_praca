@@ -13,7 +13,7 @@
 class House {
 public:
     House();
-    void giveCard(Player player);
+    void giveCard(Player& player);
     void handingOutCards();
     int getNoRound();
     void round();

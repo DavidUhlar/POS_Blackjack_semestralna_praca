@@ -2,11 +2,11 @@
 
 #include "House.h"
 
-House::House() {
+House::House() : dealer(6)  {
 
 }
 
-void House::giveCard(Player currentPlayer) {
+void House::giveCard(Player& currentPlayer) {
     currentPlayer.addCard(this->dealer.handOutCard());
 }
 
@@ -30,14 +30,25 @@ void House::pushPlayer(Player player) {
 void House::round() {
     if (this->dealer.getGameDeckSize() >= 60) {
         this->handingOutCards();
-        this->dealer.printDeck(this->numberOfRound);
+        this->dealer.printDeck(false);
         for (auto& player: listOfPlayers) {
+
             player.printDeck();
         }
         this->numberOfRound++;
     } else {
         cout << "je koniec" << endl;
     }
+
+    this->dealer.printDeck(true);
+    while(this->dealer.hit()) {
+        this->dealer.printDeck(true);
+    }
+
+
+
+    cout << "je koniec gamesky" << endl;
+    this->dealer.printDeck(true);
 }
 
 int House::getNoRound() {
