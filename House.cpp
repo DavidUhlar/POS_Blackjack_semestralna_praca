@@ -1,5 +1,6 @@
 
 
+#include <thread>
 #include "House.h"
 
 House::House() : dealer(6)  {
@@ -33,9 +34,25 @@ void House::pushPlayer(unique_ptr<Player> player) {
 
 void House::round() {
     cout << "velkost balicka: " << this->dealer.getGameDeckSize() << endl;
-    for (auto& player: listOfPlayers) {
-        player->makeDeposit();
+//    for (auto& player: listOfPlayers) {
+//        player->makeDeposit();
+//    }
+
+
+std::vector<std::thread> bettingThreads;
+
+    // Launch a thread for each player to place their bets
+    for (auto& player : listOfPlayers) {
+        bettingThreads.emplace_back(&Player::makeDeposit, player.get());
     }
+
+    // Wait for all the betting threads to finish
+    for (auto& t : bettingThreads) {
+        if (t.joinable()) {
+            t.join();
+        }
+    }
+
 
 
     int countBustSplitSize = 0;
