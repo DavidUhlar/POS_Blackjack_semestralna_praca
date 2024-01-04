@@ -33,7 +33,10 @@ void House::pushPlayer(unique_ptr<Player> player) {
 
 void House::round() {
     cout << "velkost balicka: " << this->dealer.getGameDeckSize() << endl;
-    this->makeDeposit();
+    for (auto& player: listOfPlayers) {
+        player->makeDeposit();
+    }
+
 
     int countBustSplitSize = 0;
     int countBustSplit = 0;
@@ -349,46 +352,7 @@ void House::getWinner(bool dealerWin) {
 }
 
 
-void House::makeDeposit() {
-    for (auto& player: listOfPlayers) {
-        string in;
-        bool koniec = false;
-        while (!koniec) {
-            cout << " " << endl;
-            cout << "Player: " << player->getName() << endl;
-            cout << "Select deposit(10/20/100) (balance: " << player->getBalance() << "): " << endl;
-            cout << "Leave with: leave " << endl;
 
-            try {
-                cin >> in;
-
-                if (in == "leave") {
-                    koniec = true;
-                }
-
-                int deposit = stoi(in);
-
-                if (deposit == 10 || deposit == 20 || deposit == 100) {
-                    if (deposit <= player->getBalance()) {
-                        if (player->setDeposit(deposit)) {
-                            koniec = true;
-                        } else {
-                            cout << "wrong input " << endl;
-                        }
-                    } else {
-                        cout << "not enough tokens on account " << endl;
-                    }
-                } else {
-                    cout << "House only accepts 10/20/100 tokens " << endl;
-                }
-            } catch (const exception& e) {
-                cout << "wrong input " << endl;
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            }
-        }
-    }
-}
 
 House::~House() {
 

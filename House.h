@@ -18,7 +18,7 @@ public:
     void round();
     void pushPlayer(unique_ptr<Player> player);
     void getWinner(bool dealerWin);
-    void makeDeposit();
+
     ~House();
 private:
     Dealer dealer;

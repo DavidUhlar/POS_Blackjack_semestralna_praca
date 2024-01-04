@@ -1,4 +1,5 @@
 
+
 #include "Player.h"
 
 Player::Player(string name, int balance) {
@@ -33,6 +34,7 @@ bool Player::doubleDown() {
         return true;
     } else {
         cout << "cannot double down" << endl;
+        return false;
     }
 
 }
@@ -223,6 +225,46 @@ void Player::setFirstMove(bool newFirstMove) {
 
 bool Player::getIsHandSplit() {
     return this->isHandSplit;
+}
+
+void Player::makeDeposit() {
+        string in;
+        bool koniec = false;
+        while (!koniec) {
+            cout << " " << endl;
+            cout << "Player: " << this->getName() << endl;
+            cout << "Select deposit(10/20/100) (balance: " << this->getBalance() << "): " << endl;
+            cout << "Leave with: leave " << endl;
+
+            try {
+                cin >> in;
+
+                if (in == "leave") {
+                    koniec = true;
+                }
+
+                int depositLocal = stoi(in);
+
+                if (depositLocal == 10 || depositLocal == 20 || depositLocal == 100) {
+                    if (depositLocal <= this->getBalance()) {
+                        if (this->setDeposit(depositLocal)) {
+                            koniec = true;
+                        } else {
+                            cout << "wrong input " << endl;
+                        }
+                    } else {
+                        cout << "not enough tokens on account " << endl;
+                    }
+                } else {
+                    cout << "House only accepts 10/20/100 tokens " << endl;
+                }
+            } catch (const exception& e) {
+                cout << "wrong input " << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        }
+
 }
 
 Player::~Player() {

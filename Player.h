@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <limits>
 
 #ifndef SEMESTRALKA_PLAYER_H
 #define SEMESTRALKA_PLAYER_H
@@ -34,6 +35,7 @@ public:
     bool getFirstMove();
     void setFirstMove(bool newFirstMove);
     bool getIsHandSplit();
+    void makeDeposit();
     ~Player();
 
 private:
