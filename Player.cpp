@@ -27,8 +27,17 @@ bool Player::hit(bool isSplit) {
 
 
 bool Player::doubleDown() {
-    return true;
+    if (this->getBalance() - this->getDeposit() >= 0) {
+        this->balance = this->balance - this->getDeposit();
+        this->deposit = this->deposit*2;
+        return true;
+    } else {
+        cout << "cannot double down" << endl;
+    }
+
 }
+
+
 
 bool Player::isSplitable() {
     if ((this->hand.at(0)->getValue() == this->hand.at(1)->getValue()) && this->balance >= this->deposit) {

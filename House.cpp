@@ -180,8 +180,11 @@ void House::round() {
                 player.surrender();
                 koniec = true;
 
+            } else if (in == "doubleDown" && !player.getFirstMove()) {
+                player.doubleDown();
             } else {
-                cout << "wrong input " << endl;
+                    cout << "wrong input " << endl;
+
             }
 
             if (!player.getFirstMove()) {
