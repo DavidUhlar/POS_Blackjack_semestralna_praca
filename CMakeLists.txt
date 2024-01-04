@@ -15,3 +15,4 @@ add_executable(semestralka main.cpp
         House.cpp
         House.h)
 
+target_link_libraries(semestralka pthread)

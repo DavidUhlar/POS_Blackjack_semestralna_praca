@@ -6,7 +6,7 @@
 #include <sstream>
 #include <random>
 #include <algorithm>
-
+#include <memory>
 
 #ifndef SEMESTRALKA_GAMEDECKS_H
 #define SEMESTRALKA_GAMEDECKS_H
@@ -21,11 +21,11 @@ class GameDecks {
         void loadDecks(int numOfDecks);
         int getSizeOfDeck();
 
-        Card* deckPop();
+        unique_ptr<Card> deckPop();
         ~GameDecks();
 
     private:
-        vector<Card*> gameDeck;
+        vector<unique_ptr<Card>> gameDeck;
 
 };
 

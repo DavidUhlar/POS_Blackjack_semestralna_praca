@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Card.h"
 #include "GameDecks.h"
 
@@ -5,12 +7,13 @@
 #ifndef SEMESTRALKA_DEALER_H
 #define SEMESTRALKA_DEALER_H
 
+using namespace std;
 
 class Dealer {
     public:
         Dealer(int numberOfDecks);
-        Card* handOutCard();
-        void addCard(Card* card);
+        unique_ptr<Card> handOutCard();
+        void addCard(unique_ptr<Card> card);
         void printDeck(bool showFirstCard);
         int getGameDeckSize();
         void hit();
@@ -20,7 +23,7 @@ class Dealer {
         ~Dealer();
 
     private:
-        vector<Card*> dealerHand;
+        vector<unique_ptr<Card>> dealerHand;
         GameDecks gameDecks;
         int valueOfHand;
 

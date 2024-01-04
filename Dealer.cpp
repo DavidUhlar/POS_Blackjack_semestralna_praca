@@ -8,12 +8,12 @@ Dealer::Dealer(int numberOfDecks) {
     this->gameDecks.shuffleDeck();
 }
 
-Card *Dealer::handOutCard() {
+unique_ptr<Card> Dealer::handOutCard() {
     return this->gameDecks.deckPop();
 }
 
-void Dealer::addCard(Card *card) {
-    this->dealerHand.push_back(card);
+void Dealer::addCard(unique_ptr<Card> card) {
+    this->dealerHand.push_back(std::move(card));
     this->aceChange();
 }
 
@@ -28,7 +28,7 @@ void Dealer::printDeck(bool showFirstCard) {
 
     this->calculateValueOfHand();
 
-    for (auto card : this->dealerHand) {
+    for (auto& card : this->dealerHand) {
         if (showFirstCard) {
 
             if (card->getSymbol() == "S") {
@@ -93,7 +93,7 @@ int Dealer::calculateValueOfHand() {
 
 void Dealer::aceChange() {
     if (this->calculateValueOfHand() > 21) {
-        for (auto card : this->dealerHand) {
+        for (auto& card : this->dealerHand) {
             if (this->calculateValueOfHand() > 21) {
                 if ((card->getNumber() == "A") && (card->getValue() == 11)) {
                     card->setValue(1);

@@ -48,9 +48,9 @@ bool Player::isSplitable() {
 }
 
 void Player::split() {
-    Card* lastCard = this->hand.back();
+    unique_ptr<Card> lastCard = std::move(this->hand.back());
     this->hand.pop_back();
-    this->splitHand.push_back(lastCard);
+    this->splitHand.push_back(std::move(lastCard));
     this->balance -= deposit;
     this->isHandSplit = true;
 
@@ -72,12 +72,12 @@ int Player::getBalance() {
     return this->balance;
 }
 
-void Player::addCard(Card* card) {
-    this->hand.push_back(card);
+void Player::addCard(unique_ptr<Card> card) {
+    this->hand.push_back(std::move(card));
     this->aceChange(false);
 }
-void Player::addCardSplit(Card* card) {
-    this->splitHand.push_back(card);
+void Player::addCardSplit(unique_ptr<Card> card) {
+    this->splitHand.push_back(std::move(card));
     this->aceChange(true);
 }
 
@@ -95,7 +95,7 @@ void Player::printDeck() {
 
     cout << "\n " << endl;
     cout << "Player " << this->name << ": " << endl;
-    for (auto card : this->hand) {
+    for (auto& card : this->hand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
         } else if (card->getSymbol() == "H") {
@@ -115,7 +115,7 @@ void Player::printDeckSplit() {
 
     cout << "\n " << endl;
     cout << "Player " << this->name << ": " << endl;
-    for (auto card : this->splitHand) {
+    for (auto& card : this->splitHand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
         } else if (card->getSymbol() == "H") {
@@ -133,7 +133,7 @@ void Player::printDeckSplit() {
 int Player::calculateValueOfHand() {
     int valueOfHand = 0;
 
-    for (auto card : this->hand) {
+    for (auto& card : this->hand) {
         valueOfHand += card->getValue();
     }
     return valueOfHand;
@@ -142,7 +142,7 @@ int Player::calculateValueOfHand() {
 int Player::calculateValueOfHandSplit() {
     int valueOfHand = 0;
 
-    for (auto card : this->splitHand) {
+    for (auto& card : this->splitHand) {
         valueOfHand += card->getValue();
     }
     return valueOfHand;
@@ -188,7 +188,7 @@ bool Player::setDeposit(int newDeposit) {
 void Player::aceChange(bool isSplit) {
     if (!isSplit) {
         if (this->calculateValueOfHand() > 21) {
-            for (auto card : this->hand) {
+            for (auto& card : this->hand) {
                 if (this->calculateValueOfHand() > 21) {
                     if ((card->getNumber() == "A") && (card->getValue() == 11)) {
                         card->setValue(1);
@@ -199,7 +199,7 @@ void Player::aceChange(bool isSplit) {
         }
     } else {
         if (this->calculateValueOfHandSplit() > 21) {
-            for (auto card : this->splitHand) {
+            for (auto& card : this->splitHand) {
                 if (this->calculateValueOfHandSplit() > 21) {
                     if ((card->getNumber() == "A") && (card->getValue() == 11)) {
                         card->setValue(1);

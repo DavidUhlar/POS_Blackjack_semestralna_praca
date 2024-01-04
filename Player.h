@@ -3,6 +3,7 @@
 #include "Card.h"
 #include <vector>
 #include <iostream>
+#include <memory>
 
 #ifndef SEMESTRALKA_PLAYER_H
 #define SEMESTRALKA_PLAYER_H
@@ -17,8 +18,8 @@ public:
     void surrender();
     void updateBalance(int balanceUpdate);
     int getBalance();
-    void addCard(Card* card);
-    void addCardSplit(Card* card);
+    void addCard(unique_ptr<Card> card);
+    void addCardSplit(unique_ptr<Card> card);
     void removeCards();
     void printDeck();
     void printDeckSplit();
@@ -36,13 +37,13 @@ public:
     ~Player();
 
 private:
-    vector<Card*> hand;
+    vector<unique_ptr<Card>> hand;
     int balance;
     int deposit;
     string name;
     bool bust;
     bool bustSplit;
-    vector<Card*> splitHand;
+    vector<unique_ptr<Card>> splitHand;
     bool firstMove;
     bool isHandSplit;
 

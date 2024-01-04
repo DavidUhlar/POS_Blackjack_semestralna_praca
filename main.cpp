@@ -12,8 +12,12 @@ int main() {
 
 
 
-    house.pushPlayer(Player("Regina", 1000));
-    house.pushPlayer(Player("Clang", 1000));
+    auto regina = std::make_unique<Player>("Regina", 1000);
+    auto clang = std::make_unique<Player>("Clang", 1000);
+
+    house.pushPlayer(std::move(regina));
+    house.pushPlayer(std::move(clang));
+
     for (int i = 0; i < 2; ++i) {
         house.round();
     }

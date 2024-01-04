@@ -51,7 +51,7 @@ void GameDecks::loadDecks(int numOfDecks) {
             value = stoi(token);
 
 
-            this->gameDeck.push_back({new Card(symbol, number, value)});
+            this->gameDeck.push_back(make_unique<Card>(symbol, number, value));
         }
     }
 }
@@ -64,11 +64,10 @@ int GameDecks::getSizeOfDeck() {
     return this->gameDeck.size();
 }
 
-Card* GameDecks::deckPop() {
+unique_ptr<Card> GameDecks::deckPop() {
     //LIFO
-    Card* lastCard = this->gameDeck.back();
+    unique_ptr<Card> lastCard = std::move(this->gameDeck.back());
     this->gameDeck.pop_back();
-//    cout << lastCard->getSymbol() << lastCard->getNumber() << lastCard->getValue() << endl;
     return lastCard;
 }
 
