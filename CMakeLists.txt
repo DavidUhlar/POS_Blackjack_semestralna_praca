@@ -3,7 +3,7 @@ project(semestralka)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(semestralka main.cpp
+add_executable(semestralka_server main.cpp
         Card.cpp
         GameDecks.cpp
         Card.h
@@ -14,5 +14,10 @@ add_executable(semestralka main.cpp
         Dealer.h
         House.cpp
         House.h)
+        
+add_executable(semestralka_client main_client.cpp
+        Client.cpp
+        Client.h
+)
 
-target_link_libraries(semestralka pthread)
+target_link_libraries(semestralka_server pthread)
