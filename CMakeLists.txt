@@ -13,7 +13,10 @@ add_executable(semestralka_server Server/main.cpp
         Server/Dealer.cpp
         Server/Dealer.h
         Server/House.cpp
-        Server/House.h)
+        Server/House.h
+        Server/Server.cpp
+        Server/Server.h
+)
         
 add_executable(semestralka_client Client/main_client.cpp
         Client/Client.cpp

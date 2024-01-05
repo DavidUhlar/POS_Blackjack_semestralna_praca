@@ -16,7 +16,7 @@ void GameDecks::shuffleDeck() {
 void GameDecks::loadDecks(int numOfDecks) {
 
     filesystem::path currentPath = filesystem::current_path();
-    filesystem::path fullPath = currentPath.parent_path() / "balicek.txt";
+    filesystem::path fullPath = currentPath.parent_path() / "Server/balicek.txt";
     string fullPathStr = fullPath.string();
     cout << fullPathStr << endl;
 

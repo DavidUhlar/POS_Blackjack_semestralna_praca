@@ -27,7 +27,7 @@ void House::handingOutCards() {
 }
 
 void House::pushPlayer(unique_ptr<Player> player) {
-    this->listOfPlayers.push_back(std::move(player));
+    this->listOfPlayers.emplace_back(std::move(player));
 }
 
 
@@ -368,12 +368,20 @@ void House::getWinner(bool dealerWin) {
     this->dealer.removeCards();
 }
 
+void House::getPlayers() {
+    cout << "vypis playerov z housu" << endl;
+    for (auto& player: this->listOfPlayers) {
+        cout << player->getName() << " " << player->getBalance()  << endl;
+    }
+}
 
 
 
 House::~House() {
 
 }
+
+
 
 
 

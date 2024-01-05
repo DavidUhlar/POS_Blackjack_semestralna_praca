@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include "Client.h"
 #include "my_socket.h"
@@ -9,7 +10,7 @@ using namespace std;
 int main() {
     cout << "klient" << endl;
 
-    MySocket* mySocket = MySocket::createConnection("frios2.fri.uniza.sk", 12069);
+    MySocket* mySocket = MySocket::createConnection("127.0.0.1", 8080);
 
     Client client;
 
@@ -27,6 +28,3 @@ int main() {
 
 
 }
-
-
-
