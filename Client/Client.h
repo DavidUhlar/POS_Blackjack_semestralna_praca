@@ -5,8 +5,20 @@
 #ifndef SEMESTRALKA_CLIENT_H
 #define SEMESTRALKA_CLIENT_H
 
+#include <iostream>
+
+using namespace std;
 
 class Client {
+
+    public:
+        Client();
+        string getName();
+        void setName();
+        ~Client();
+
+    private:
+        string name;
 
 };
 

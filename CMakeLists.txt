@@ -18,6 +18,8 @@ add_executable(semestralka_server Server/main.cpp
 add_executable(semestralka_client Client/main_client.cpp
         Client/Client.cpp
         Client/Client.h
+        Client/my_socket.cpp
+        Client/my_socket.h
 )
 
 target_link_libraries(semestralka_server pthread)
