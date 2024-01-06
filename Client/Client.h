@@ -12,12 +12,16 @@ class Client {
         Client();
         string getName();
         void setName();
-
+        void setDeposit();
+        void setMove();
+        string getDeposit();
+        string getMove();
         ~Client();
 
     private:
         string name;
-
+        string deposit;
+        string move;
 
 };
 

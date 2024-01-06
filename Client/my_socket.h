@@ -1,6 +1,3 @@
-//
-// Created by dadod on 05.01.2024.
-//
 
 #ifndef SEMESTRALKA_MY_SOCKET_H
 #define SEMESTRALKA_MY_SOCKET_H
@@ -15,6 +12,7 @@ public:
     ~MySocket();
     void sendData(const std::string& data);
     void sendEndMessage();
+    std::string receiveData();
     std::string serialize(std::string &output, std::string &meno, int balance);
 protected:
     MySocket(int socket); // Update the constructor declaration

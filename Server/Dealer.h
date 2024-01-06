@@ -14,7 +14,7 @@ class Dealer {
         Dealer(int numberOfDecks);
         unique_ptr<Card> handOutCard();
         void addCard(unique_ptr<Card> card);
-        void printDeck(bool showFirstCard);
+        string printDeck(bool showFirstCard);
         int getGameDeckSize();
         void hit();
         int calculateValueOfHand();

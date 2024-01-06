@@ -22,8 +22,8 @@ public:
     void addCard(unique_ptr<Card> card);
     void addCardSplit(unique_ptr<Card> card);
     void removeCards();
-    void printDeck();
-    void printDeckSplit();
+    string printDeck();
+    string printDeckSplit();
     int calculateValueOfHand();
     int calculateValueOfHandSplit();
     string getName();
@@ -35,7 +35,6 @@ public:
     bool getFirstMove();
     void setFirstMove(bool newFirstMove);
     bool getIsHandSplit();
-    void makeDeposit();
     ~Player();
 
 private:

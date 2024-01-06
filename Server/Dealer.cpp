@@ -17,13 +17,14 @@ void Dealer::addCard(unique_ptr<Card> card) {
     this->aceChange();
 }
 
-void Dealer::printDeck(bool showFirstCard) {
-
+string Dealer::printDeck(bool showFirstCard) {
+    string cards = "";
     int index = 0;
 
     cout << "\n " << endl;
     cout << "Dealer: " << endl;
-
+    cards += "\n ";
+    cards += "Dealer : \n";
 
 
     this->calculateValueOfHand();
@@ -33,28 +34,37 @@ void Dealer::printDeck(bool showFirstCard) {
 
             if (card->getSymbol() == "S") {
                 cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                cards += "symbol: S , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             } else if (card->getSymbol() == "H") {
                 cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                cards += "symbol: H , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             } else if (card->getSymbol() == "D") {
                 cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                cards += "symbol: D , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             } else if (card->getSymbol() == "C") {
                 cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                cards += "symbol: C , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             }
 
 
         } else {
 
             if (index == 0) {
-                cout << "tajnô karta " << endl;
+                cout << "hidden card" << endl;
+                cards += "hidden card\n";
             } else {
                 if (card->getSymbol() == "S") {
                     cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                    cards += "symbol: S , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 } else if (card->getSymbol() == "H") {
                     cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                    cards += "symbol: H , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 } else if (card->getSymbol() == "D") {
                     cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                    cards += "symbol: D , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 } else if (card->getSymbol() == "C") {
                     cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
+                    cards += "symbol: C , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 }
             }
         }
@@ -64,8 +74,9 @@ void Dealer::printDeck(bool showFirstCard) {
     }
     if (showFirstCard) {
         cout << "Value of dealers hand: " << valueOfHand << endl;
+        cards += "Value of dealers hand: " + to_string(valueOfHand) + "\n";
     }
-
+    return cards;
 }
 
 

@@ -71,6 +71,22 @@ void MySocket::sendEndMessage() {
     this->sendData(this->endMessage);
 }
 
+std::string MySocket::receiveData() {
+    char buffer[1024];
+
+    memset(buffer, 0, sizeof(buffer));
+
+    ssize_t bytesReceived = recv(this->connectSocket, buffer, sizeof(buffer), 0);
+
+    if (bytesReceived == -1) {
+        throw std::runtime_error("receive failed\n");
+    } else if (bytesReceived == 0) {
+        throw std::runtime_error("Connection closed\n");
+    } else {
+        return std::string(buffer, bytesReceived);
+    }
+}
+
 std::string MySocket::serialize(std::string &output, std::string &meno, int balance) {
     output += meno + ";" + std::to_string(balance) + ";";
     return output;
