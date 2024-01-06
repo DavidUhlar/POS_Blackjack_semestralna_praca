@@ -18,10 +18,29 @@ void Client::setName() {
 }
 
 void Client::setDeposit() {
-    string in;
-    cout << "Input deposit" << endl;
-    cin >> in;
-    this->deposit = in;
+    bool koniec = true;
+    while (koniec) {
+        string in;
+        cout << "Input deposit" << endl;
+
+        try {
+            cin >> in;
+            int depositLocal = stoi(in);
+
+            if (depositLocal == 10 || depositLocal == 20 || depositLocal == 100) {
+                koniec = false;
+                this->deposit = to_string(depositLocal);
+            }
+
+
+        } catch (const exception& e) {
+            cout << "wrong input " << endl;
+
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        }
+    }
 }
 
 void Client::setMove() {

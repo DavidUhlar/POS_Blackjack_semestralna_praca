@@ -23,7 +23,7 @@ string Dealer::printDeck(bool showFirstCard) {
 
     cout << "\n " << endl;
     cout << "Dealer: " << endl;
-    cards += "\n ";
+    cards += "\n";
     cards += "Dealer : \n";
 
 
@@ -34,16 +34,16 @@ string Dealer::printDeck(bool showFirstCard) {
 
             if (card->getSymbol() == "S") {
                 cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                cards += "symbol: S , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                cards += "symbol: \u2660 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             } else if (card->getSymbol() == "H") {
                 cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                cards += "symbol: H , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                cards += "symbol: \u2665 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             } else if (card->getSymbol() == "D") {
                 cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                cards += "symbol: D , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                cards += "symbol: \u2666 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             } else if (card->getSymbol() == "C") {
                 cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                cards += "symbol: C , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                cards += "symbol: \u2663 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
             }
 
 
@@ -55,16 +55,16 @@ string Dealer::printDeck(bool showFirstCard) {
             } else {
                 if (card->getSymbol() == "S") {
                     cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                    cards += "symbol: S , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                    cards += "symbol: \u2660 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 } else if (card->getSymbol() == "H") {
                     cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                    cards += "symbol: H , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                    cards += "symbol: \u2665 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 } else if (card->getSymbol() == "D") {
                     cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                    cards += "symbol: D , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                    cards += "symbol: \u2666 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 } else if (card->getSymbol() == "C") {
                     cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-                    cards += "symbol: C , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+                    cards += "symbol: \u2663 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
                 }
             }
         }

@@ -4,6 +4,7 @@
 #define SEMESTRALKA_CLIENT_H
 
 #include <iostream>
+#include <limits>
 
 using namespace std;
 

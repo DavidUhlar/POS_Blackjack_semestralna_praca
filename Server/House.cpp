@@ -79,20 +79,25 @@ void House::makeDeposit(Player& player) {
                     } else {
                       cout << "wrong input " << endl;
                         this->sendMessageToClient("wrong input ");
+                        this->sendMessageToClient("specialMessage");
                     }
                 } else {
                     cout << "not enough tokens on account " << endl;
                     this->sendMessageToClient("not enough tokens on account ");
+                    this->sendMessageToClient("specialMessage");
                 }
             } else {
                 cout << "House only accepts 10/20/100 tokens " << endl;
                 this->sendMessageToClient("House only accepts 10/20/100 tokens ");
+                this->sendMessageToClient("specialMessage");
             }
         } catch (const exception& e) {
             cout << "wrong input " << endl;
             this->sendMessageToClient("wrong input ");
+
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            this->sendMessageToClient("specialMessage");
         }
     }
 
@@ -187,9 +192,10 @@ void House::round() {
     this->sendMessageToClient("----------TABLE-----------\n");
     if (this->dealer.getGameDeckSize() >= 60) {
         this->handingOutCards();
-       string kokot = this->dealer.printDeck(false);
+
+        cout << this->dealer.printDeck(false) << endl;
         this->sendMessageToClient(this->dealer.printDeck(false));
-        cout << "frajerina: " << kokot << endl;
+
         for (auto& player: listOfPlayers) {
             player->setBust(false, true);
             player->setBust(false, false);
@@ -214,6 +220,9 @@ void House::round() {
     for (auto& player: listOfPlayers) {
         cout << "" << endl;
         cout << "Player: " << player->getName() << endl;
+
+        this->sendMessageToClient("\n");
+        this->sendMessageToClient("\nPlayer: \n");
 
         string in;
         string inSplit;
@@ -261,11 +270,11 @@ void House::round() {
 
                     player->setBust(true, false);
                     cout << "bust " << endl;
-                    this->sendMessageToClient("bust ");
+                    this->sendMessageToClient("bust \n");
                     koniec = true;
                 } else if (player->calculateValueOfHand() == 21){
                     cout << "win " << endl;
-                    this->sendMessageToClient("win ");
+                    this->sendMessageToClient("win \n");
                     koniec = true;
                 }
             } else if (in == "stand") {
@@ -318,7 +327,7 @@ void House::round() {
                     this->sendMessageToClient("hand 2 \n");
                     this->sendMessageToClient(player->printDeckSplit());
                     cout << "hit/stand " << endl;
-                    this->sendMessageToClient("hit/stand ");
+                    this->sendMessageToClient("\nhit/stand ");
                     this->sendMessageToClient(";specialMessageMove");
 
 //                    cin >> inSplit;
@@ -331,11 +340,11 @@ void House::round() {
 
                             player->setBust(true, true);
                             cout << "bust " << endl;
-                            this->sendMessageToClient("bust ");
+                            this->sendMessageToClient("bust \n");
                             koniecSplit = true;
                         } else if (player->calculateValueOfHandSplit() == 21){
                             cout << "win " << endl;
-                            this->sendMessageToClient("win ");
+                            this->sendMessageToClient("win \n");
                             koniecSplit = true;
                         }
                     } else if (inSplit == "stand") {
@@ -388,7 +397,7 @@ void House::round() {
 
     if (countBust == listOfPlayers.size()) {
         cout << "DEALER WINS" << endl;
-        this->sendMessageToClient("DEALER WINS");
+        this->sendMessageToClient("DEALER WINS\n");
     } else {
         while(this->dealer.calculateValueOfHand() < 17) {
             bool dealerWin = true;
@@ -406,7 +415,7 @@ void House::round() {
 
             if (dealerWin) {
                 cout << "DEALER WINS" << endl;
-                this->sendMessageToClient("DEALER WINS");
+                this->sendMessageToClient("DEALER WINS \n");
                 this->getWinner(dealerWin);
                 break;
             }
@@ -415,8 +424,8 @@ void House::round() {
             this->sendMessageToClient(this->dealer.printDeck(true));
         }
     }
-    cout << "end of game" << endl;
-    this->sendMessageToClient("end of game");
+    cout << "\nend of game" << endl;
+    this->sendMessageToClient("end of game \n");
 
     this->getWinner(false);
 
@@ -439,7 +448,7 @@ void House::getWinner(bool dealerWin) {
     cout << "" << endl;
     cout << "--------GAME RECAP---------" << endl;
     this->dealer.printDeck(true);
-    this->sendMessageToClient("\n --------GAME RECAP---------");
+    this->sendMessageToClient("\n --------GAME RECAP--------- \n");
     this->sendMessageToClient(this->dealer.printDeck(true));
     for (auto& player: listOfPlayers) {
         player->printDeck();
@@ -452,12 +461,12 @@ void House::getWinner(bool dealerWin) {
 
     cout << "" << endl;
     cout << "--------WINNERS---------" << endl;
-    this->sendMessageToClient("\n --------WINNERS---------");
+    this->sendMessageToClient("\n --------WINNERS--------- \n");
     if (!dealerWin) {
         for (auto& player: listOfPlayers) {
             if (player->getIsHandSplit()) {
                 cout << "Hand 1: " << endl;
-                this->sendMessageToClient("Hand 1: ");
+                this->sendMessageToClient("\nHand 1: ");
             }
             if (player->calculateValueOfHand() > this->dealer.calculateValueOfHand() && !player->isBust(false)) {
                 cout << player->getName() << " " << player->getDeposit() << " x2" << endl;

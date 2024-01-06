@@ -95,23 +95,23 @@ void Player::removeCards() {
 string Player::printDeck() {
     string cards = "";
 
-    cout << "\n " << endl;
+    cout << "\n" << endl;
     cout << "Player " << this->name << ": " << endl;
-    cards += "\n ";
+    cards += "\n";
     cards += "Player " + this->name + ": \n";
     for (auto& card : this->hand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: S , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2660 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         } else if (card->getSymbol() == "H") {
             cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: H , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2665 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         } else if (card->getSymbol() == "D") {
             cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: D , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2666 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         } else if (card->getSymbol() == "C") {
             cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: C , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2663 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         }
 
     }
@@ -126,21 +126,21 @@ string Player::printDeckSplit() {
 
     cout << "\n " << endl;
     cout << "Player " << this->name << ": " << endl;
-    cards += "\n ";
+    cards += "\n";
     cards += "Player " + this->name + ": \n";
     for (auto& card : this->splitHand) {
         if (card->getSymbol() == "S") {
             cout << "symbol: \u2660 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: S , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2660 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         } else if (card->getSymbol() == "H") {
             cout << "symbol: \u2665 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: H , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2665 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         } else if (card->getSymbol() == "D") {
             cout << "symbol: \u2666 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: D , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2666 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         } else if (card->getSymbol() == "C") {
             cout << "symbol: \u2663 , Number: " << card->getNumber() <<  ", value: " << card->getValue() << endl;
-            cards += "symbol: C , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
+            cards += "symbol: \u2663 , Number: " + card->getNumber() +  ", value: " + to_string(card->getValue()) + "\n";
         }
 
     }
