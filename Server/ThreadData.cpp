@@ -19,9 +19,7 @@ std::mutex& ThreadData::getMutex() {
 std::condition_variable& ThreadData::getConditionVariable() {
     return this->waitCondVariable;
 }
-std::condition_variable& ThreadData::getConditionVariableNotification() {
-    return this->notificationCV;
-}
+
 
 int& ThreadData::getThreadCounter() {
     return threadCounter;
@@ -29,6 +27,10 @@ int& ThreadData::getThreadCounter() {
 
 int& ThreadData::getThreadReady() {
     return readyThreads;
+}
+
+int& ThreadData::getThreadReadyWinner() {
+    return winnerReadyTready;
 }
 
 std::unordered_map<string, std::string>& ThreadData::getPlayerCards() {
@@ -39,11 +41,10 @@ void ThreadData::setPlayerCards(string playerName, const std::string& playerCard
     playerCardsMap[playerName] = playerCards;
 }
 
-
-void ThreadData::setNotificationReady(bool value) {
-    notificationReady = value;
+void ThreadData::setReadyTready() {
+    readyThreads = 0;
 }
 
-bool& ThreadData::getNotificationReady() {
-    return notificationReady;
+void ThreadData::setReadyTreadyWinner() {
+    winnerReadyTready = 0;
 }

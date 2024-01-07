@@ -6,7 +6,7 @@ int main() {
     const char* ipAddress = "frios2.fri.uniza.sk";
 
 //    int port = 8080;
-    int port = 10242;
+    int port = 10243;
     House server;
     server.startListening(ipAddress, port, new ThreadData(new Dealer(6)));
 //    server.sendMessageToClient("Hello from the server!");

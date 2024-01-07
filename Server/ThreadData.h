@@ -15,24 +15,24 @@ class ThreadData {
         Dealer* getDealer();
         std::mutex& getMutex();
         std::condition_variable& getConditionVariable();
-        std::condition_variable& getConditionVariableNotification();
         int& getThreadCounter();
         int& getThreadReady();
+        int& getThreadReadyWinner();
+        void setReadyTready();
+        void setReadyTreadyWinner();
         std::unordered_map<std::string, std::string>& getPlayerCards();
         void setPlayerCards(string playerName, const std::string& playerCards);
-        void setNotificationReady(bool value);
-        bool& getNotificationReady();
+
 
 
     private:
         Dealer* dealer;
         std::mutex mutex;
         std::condition_variable waitCondVariable;
-        std::condition_variable notificationCV;
         int threadCounter=0;
         int readyThreads=0;
+        int winnerReadyTready=0;
         std::unordered_map<string, std::string> playerCardsMap;
-        bool notificationReady;
 
 };
 
