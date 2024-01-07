@@ -14,6 +14,8 @@ add_executable(semestralka_server Server/main.cpp
         Server/Dealer.h
         Server/House.cpp
         Server/House.h
+        Server/ThreadData.cpp
+        Server/ThreadData.h
 )
         
 add_executable(semestralka_client Client/main_client.cpp

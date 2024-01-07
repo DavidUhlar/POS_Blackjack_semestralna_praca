@@ -4,43 +4,84 @@
 #include "House.h"
 
 
-House::House() : dealer(6)  {
+House::House() {
 
 
 }
 
-void House::startListening(const char *ipAddress, int port) {
+void House::startListening(const char *ipAddress, int port, void* sharedData) {
+    ThreadData* threadData = (ThreadData*) sharedData;
 
-        this->serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-        // Set up server address struct
-        memset(&serverAddr, 0, sizeof(this->serverAddr));
-        this->serverAddr.sin_family = AF_INET;
-        this->serverAddr.sin_port = htons(port);
+    this->serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-        // Set the IP address to the desired value
-        inet_pton(AF_INET, ipAddress, &(this->serverAddr.sin_addr));
+    // Set up server address struct
+    memset(&serverAddr, 0, sizeof(this->serverAddr));
+    this->serverAddr.sin_family = AF_INET;
+    this->serverAddr.sin_port = htons(port);
 
-        // Bind socket to address
-        bind(this->serverSocket, (struct sockaddr*)&serverAddr, sizeof(this->serverAddr));
+    // Set the IP address to the desired value
+    inet_pton(AF_INET, ipAddress, &(this->serverAddr.sin_addr));
 
-        // Listen for incoming connections
-        listen(this->serverSocket, 5);
+    // Bind socket to address
+    bind(this->serverSocket, (struct sockaddr*)&serverAddr, sizeof(this->serverAddr));
+
+    // Listen for incoming connections
+    listen(this->serverSocket, 5);
 
         // Accept connection
 //        this->clientAddrLen = sizeof(clientAddr);
 //        this->clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
-    while (clientThreads.size() < 2) {
-        // Accept connection
-        this->clientAddrLen = sizeof(clientAddr);
-        int newClientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
 
-        if (newClientSocket != -1) {
-            // Start a new thread to handle the client
-            std::thread clientThread(&House::round, this, newClientSocket);
-            clientThreads.push_back(std::move(clientThread));
+    int connectedClients = 0;
+    while(true) {
+        while (connectedClients < 2) {
+            // Accept connection
+            this->clientAddrLen = sizeof(clientAddr);
+            int newClientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+
+            if (newClientSocket != -1) {
+                // Start a new thread to handle the client
+    //            std::thread clientThread(&House::round, this, newClientSocket);
+
+                clientSockets.push_back(newClientSocket);
+    //            std::thread clientThread(&House::round, this, newClientSocket, std::ref(threadData));
+    //            clientThreads.push_back(std::move(clientThread));
+
+
+
+            }
+            connectedClients++;
+            cout << connectedClients << endl;
         }
+
+        if (connectedClients == 2) {
+            for (int i = 0; i < 2; ++i) {
+                this->sendMessageToClient("zacnitePiectTeraz", clientSockets.at(i));
+                threadData->getDealer()->addCard(threadData->getDealer()->handOutCard());
+            }
+
+            for (int i = 0; i < 2; ++i) {
+                std::thread clientThread(&House::round, this, clientSockets.at(i), std::ref(threadData));
+                //                    clientThread.detach();
+                clientThreads.push_back(std::move(clientThread));
+            }
+        }
+
+        for (auto& thread : clientThreads) {
+            if (thread.joinable()) {
+                thread.join();
+            }
+        }
+        close(serverSocket);
     }
+//    for (int i = 0; i < 2; ++i) {
+//        std::thread clientThread(&House::round, this, clientSockets.at(i), std::ref(threadData));
+//        clientThread.detach();
+//        clientThreads.push_back(std::move(clientThread));
+//    }
+//
+
 }
 
 void House::handleClient(int clientSocket) {
@@ -81,12 +122,13 @@ void House::makeDeposit(Player& player, int clientSocket) {
         this->sendMessageToClient(player.getName() + "\n", clientSocket);
         this->sendMessageToClient("Select deposit(10/20/100) (balance: " , clientSocket);
         this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
-        this->sendMessageToClient("): ;", clientSocket);
+        this->sendMessageToClient("): ", clientSocket);
+        this->sendMessageToClient(";specialMessage", clientSocket);
         //        cout << "Leave with: leave " << endl;
 
         try {
 //            cin >> in;
-            this->sendMessageToClient("specialMessage", clientSocket);
+
             in = this->receiveInputFromClient(clientSocket);
 
             if (in == "leave") {
@@ -126,7 +168,7 @@ void House::makeDeposit(Player& player, int clientSocket) {
 
 }
 
-Player House::receiveName(int clientSocket) {
+std::unique_ptr<Player> House::receiveName(int clientSocket) {
     std::string name = "";
     char buffer[1024];
 
@@ -148,7 +190,7 @@ Player House::receiveName(int clientSocket) {
     cout << "balance: " << balance << endl;
 
 
-    auto regina = Player(name, balance);
+    auto regina = std::make_unique<Player>(name, balance);
 //    this->pushPlayer(std::move(regina));
 
     return regina;
@@ -159,20 +201,23 @@ Player House::receiveName(int clientSocket) {
 
 
 
-void House::giveCard(Player& currentPlayer) {
-    currentPlayer.addCard(this->dealer.handOutCard());
+void House::giveCard(Player& currentPlayer, void* sharedData) {
+    ThreadData* threadData = (ThreadData*) sharedData;
+    currentPlayer.addCard(threadData->getDealer()->handOutCard());
 }
 
-void House::giveCardSplit(Player& currentPlayer) {
-    currentPlayer.addCardSplit(this->dealer.handOutCard());
+void House::giveCardSplit(Player& currentPlayer, void* sharedData) {
+    ThreadData* threadData = (ThreadData*) sharedData;
+
+    currentPlayer.addCardSplit(threadData->getDealer()->handOutCard());
 }
 
-void House::handingOutCards(Player player) {
-
+void House::handingOutCards(Player& player, void* sharedData) {
+    ThreadData* threadData = (ThreadData*) sharedData;
     for (int i = 0; i < 2; ++i) {
-        this->dealer.addCard(this->dealer.handOutCard());
 
-            this->giveCard(player);
+
+        this->giveCard(player, threadData);
 
     }
 
@@ -183,14 +228,14 @@ void House::handingOutCards(Player player) {
 //}
 
 
-void House::round(int clientSocket) {
-
+void House::round(int clientSocket, void* sharedData) {
+    ThreadData* threadData = (ThreadData*) sharedData;
 //    this->receiveName(clientSocket);
 //    Player player;
-    Player player = this->receiveName(clientSocket);
-    cout << "velkost balicka: " << this->dealer.getGameDeckSize() << endl;
-
-        this->makeDeposit(player, clientSocket);
+    std::unique_ptr<Player> player = this->receiveName(clientSocket);
+    //cout << "velkost balicka: " << this->dealer.getGameDeckSize() << endl;
+    threadData->getDealer()->getGameDeckSize();
+    this->makeDeposit(*player, clientSocket);
 
 
 
@@ -219,18 +264,19 @@ void House::round(int clientSocket) {
     this->sendMessageToClient("\n", clientSocket);
     this->sendMessageToClient("\n", clientSocket);
     this->sendMessageToClient("----------TABLE-----------\n", clientSocket);
-    if (this->dealer.getGameDeckSize() >= 60) {
-        this->handingOutCards(player);
+    if (threadData->getDealer()->getGameDeckSize() >= 60) {
 
-        cout << this->dealer.printDeck(false) << endl;
-        this->sendMessageToClient(this->dealer.printDeck(false), clientSocket);
+        std::unique_lock<std::mutex> lock(threadData->getMutex());
+        this->handingOutCards(*player, threadData);
+        cout << threadData->getDealer()->printDeck(false) << endl;
+        this->sendMessageToClient(threadData->getDealer()->printDeck(false), clientSocket);
+        lock.unlock();
 
-
-            player.setBust(false, true);
-            player.setBust(false, false);
-            player.setFirstMove(false);
-            player.printDeck();
-            this->sendMessageToClient(player.printDeck(), clientSocket);
+        player->setBust(false, true);
+        player->setBust(false, false);
+        player->setFirstMove(false);
+        player->printDeck();
+        this->sendMessageToClient(player->printDeck(), clientSocket);
 
         this->numberOfRound++;
     } else {
@@ -248,7 +294,7 @@ void House::round(int clientSocket) {
 
 
         cout << "" << endl;
-        cout << "Player: " << player.getName() << endl;
+        cout << "Player: " << player->getName() << endl;
 
         this->sendMessageToClient("\n", clientSocket);
         this->sendMessageToClient("\nPlayer: \n", clientSocket);
@@ -260,10 +306,10 @@ void House::round(int clientSocket) {
 
         while (!koniec)
         {
-            this->sendMessageToClient( dealer.printDeck(false), clientSocket);
-            this->sendMessageToClient( player.printDeck(), clientSocket);
+            this->sendMessageToClient( threadData->getDealer()->printDeck(false), clientSocket);
+            this->sendMessageToClient( player->printDeck(), clientSocket);
 
-            if (player.calculateValueOfHand() == 21) {
+            if (player->calculateValueOfHand() == 21) {
                 cout << "BLACKJACK" << endl;
                 this->sendMessageToClient("BLACKJACK", clientSocket);
                 koniec = true;
@@ -271,8 +317,8 @@ void House::round(int clientSocket) {
             }
 
 
-            if (!player.getFirstMove()) {
-                if (player.isSplitable()) {
+            if (!player->getFirstMove()) {
+                if (player->isSplitable()) {
                     cout << "hit/stand/surrender/split/doubleDown " << endl;
                     this->sendMessageToClient( "hit/stand/surrender/split/doubleDown ;", clientSocket);
                     this->sendMessageToClient("specialMessageMove", clientSocket);
@@ -292,16 +338,16 @@ void House::round(int clientSocket) {
             in = this->receiveInputFromClient(clientSocket);
 
             if (in == "hit") {
-                if (player.hit(false)) {
-                    this->giveCard(player);
+                if (player->hit(false)) {
+                    this->giveCard(*player, threadData);
                 }
-                if (player.calculateValueOfHand() > 21) {
+                if (player->calculateValueOfHand() > 21) {
 
-                    player.setBust(true, false);
+                    player->setBust(true, false);
                     cout << "bust " << endl;
                     this->sendMessageToClient("bust \n", clientSocket);
                     koniec = true;
-                } else if (player.calculateValueOfHand() == 21){
+                } else if (player->calculateValueOfHand() == 21){
                     cout << "win " << endl;
                     this->sendMessageToClient("win \n", clientSocket);
                     koniec = true;
@@ -310,16 +356,16 @@ void House::round(int clientSocket) {
                 koniec = true;
             } else if (in == "end") {
                 koniec = true;
-            } else if (in == "split" && !player.getFirstMove() && player.isSplitable()) {
+            } else if (in == "split" && !player->getFirstMove() && player->isSplitable()) {
 
-                player.split();
+                player->split();
                 countBustSplitSize++;
                 bool koniecNormal = false;
                 while (!koniecNormal)
                 {
                     cout << "hand 1 " << endl;
                     this->sendMessageToClient("hand 1 \n", clientSocket);
-                    this->sendMessageToClient(player.printDeck(), clientSocket);
+                    this->sendMessageToClient(player->printDeck(), clientSocket);
 
                     cout << "hit/stand " << endl;
                     this->sendMessageToClient("hit/stand \n", clientSocket);
@@ -329,16 +375,18 @@ void House::round(int clientSocket) {
 //                    cin >> inSplit;
                     inSplit = this->receiveInputFromClient(clientSocket);
                     if (inSplit == "hit") {
-                        if (player.hit(false)) {
-                            this->giveCard(player);
+                        if (player->hit(false)) {
+                            std::unique_lock<std::mutex> lock(threadData->getMutex());
+                            this->giveCard(*player, threadData);
+                            lock.unlock();
                         }
-                        if (player.calculateValueOfHand() > 21) {
+                        if (player->calculateValueOfHand() > 21) {
 
-                            player.setBust(true, false);
+                            player->setBust(true, false);
                             cout << "bust " << endl;
                             this->sendMessageToClient("bust \n", clientSocket);
                             koniecNormal = true;
-                        } else if (player.calculateValueOfHand() == 21){
+                        } else if (player->calculateValueOfHand() == 21){
                             cout << "win " << endl;
                             this->sendMessageToClient("win \n", clientSocket);
                             koniecNormal = true;
@@ -354,7 +402,7 @@ void House::round(int clientSocket) {
                 {
                     cout << "hand 2 " << endl;
                     this->sendMessageToClient("hand 2 \n", clientSocket);
-                    this->sendMessageToClient(player.printDeckSplit(), clientSocket);
+                    this->sendMessageToClient(player->printDeckSplit(), clientSocket);
                     cout << "hit/stand " << endl;
                     this->sendMessageToClient("\nhit/stand ", clientSocket);
                     this->sendMessageToClient(";specialMessageMove", clientSocket);
@@ -362,16 +410,18 @@ void House::round(int clientSocket) {
 //                    cin >> inSplit;
                     inSplit = this->receiveInputFromClient(clientSocket);
                     if (inSplit == "hit") {
-                        if (player.hit(true)) {
-                            this->giveCardSplit(player);
+                        if (player->hit(true)) {
+                            std::unique_lock<std::mutex> lock(threadData->getMutex());
+                            this->giveCardSplit(*player, threadData);
+                            lock.unlock();
                         }
-                        if (player.calculateValueOfHandSplit() > 21) {
+                        if (player->calculateValueOfHandSplit() > 21) {
 
-                            player.setBust(true, true);
+                            player->setBust(true, true);
                             cout << "bust " << endl;
                             this->sendMessageToClient("bust \n", clientSocket);
                             koniecSplit = true;
-                        } else if (player.calculateValueOfHandSplit() == 21){
+                        } else if (player->calculateValueOfHandSplit() == 21){
                             cout << "win " << endl;
                             this->sendMessageToClient("win \n", clientSocket);
                             koniecSplit = true;
@@ -381,37 +431,39 @@ void House::round(int clientSocket) {
                     }
                 }
                 koniec = true;
-            } else if (in == "surrender" && !player.getFirstMove()) {
-                player.surrender();
+            } else if (in == "surrender" && !player->getFirstMove()) {
+                player->surrender();
                 koniec = true;
 
-            } else if (in == "doubleDown" && !player.getFirstMove()) {
-                player.doubleDown();
+            } else if (in == "doubleDown" && !player->getFirstMove()) {
+                player->doubleDown();
             } else {
                     cout << "wrong input " << endl;
                 this->sendMessageToClient("wrong input ", clientSocket);
 
             }
 
-            if (!player.getFirstMove()) {
-                player.setFirstMove(true);
+            if (!player->getFirstMove()) {
+                player->setFirstMove(true);
             }
 
         }
-        this->sendMessageToClient(player.printDeck(), clientSocket);
+        this->sendMessageToClient(player->printDeck(), clientSocket);
 
 
 
     //posledne ked hraci dovyberaju
-    this->sendMessageToClient(this->dealer.printDeck(true), clientSocket);
+    std::unique_lock<std::mutex> lock(threadData->getMutex());
+    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
+    lock.unlock();
 
     int countBust = 0;
 
-        if (player.isBust(false)) {
+        if (player->isBust(false)) {
             countBust++;
         }
 
-        if (player.isBust(true)) {
+        if (player->isBust(true)) {
             countBustSplit++;
         }
 
@@ -428,15 +480,17 @@ void House::round(int clientSocket) {
         cout << "DEALER WINS" << endl;
         this->sendMessageToClient("DEALER WINS\n", clientSocket);
 //    } else {
-        while(this->dealer.calculateValueOfHand() < 17) {
-            bool dealerWin = true;
-            this->sendMessageToClient(this->dealer.printDeck(true), clientSocket);
 
-                if (this->dealer.calculateValueOfHand() < player.calculateValueOfHand() && !player.isBust(false)) {
+        while(threadData->getDealer()->calculateValueOfHand() < 17) {
+            bool dealerWin = true;
+
+            this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
+
+                if (threadData->getDealer()->calculateValueOfHand() < player->calculateValueOfHand() && !player->isBust(false)) {
                     dealerWin = false;
                 }
-                if (player.getIsHandSplit()) {
-                    if (this->dealer.calculateValueOfHand() < player.calculateValueOfHandSplit() && !player.isBust(true)) {
+                if (player->getIsHandSplit()) {
+                    if (threadData->getDealer()->calculateValueOfHand() < player->calculateValueOfHandSplit() && !player->isBust(true)) {
                         dealerWin = false;
                     }
                 }
@@ -445,27 +499,28 @@ void House::round(int clientSocket) {
             if (dealerWin) {
                 cout << "DEALER WINS" << endl;
                 this->sendMessageToClient("DEALER WINS \n", clientSocket);
-                this->getWinner(player, dealerWin, clientSocket);
+                this->getWinner(*player, dealerWin, clientSocket, threadData);
                 break;
             }
-            this->dealer.hit();
-
-            this->sendMessageToClient(this->dealer.printDeck(true), clientSocket);
+            std::unique_lock<std::mutex> lock(threadData->getMutex());
+            threadData->getDealer()->hit();
+            lock.unlock();
+            this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
         }
 //    }
     cout << "\nend of game" << endl;
     this->sendMessageToClient("end of game \n", clientSocket);
 
-    this->getWinner(player, false, clientSocket);
+    this->getWinner(*player, false, clientSocket, sharedData);
 
     cout << "" << endl;
     cout << "Actuall balance: " << endl;
     this->sendMessageToClient("\n Actuall balance: \n", clientSocket);
 
-        cout << player.getName() << " " << player.getBalance() << endl;
-        this->sendMessageToClient(player.getName(), clientSocket);
+        cout << player->getName() << " " << player->getBalance() << endl;
+        this->sendMessageToClient(player->getName(), clientSocket);
         this->sendMessageToClient("\n", clientSocket);
-        this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
+        this->sendMessageToClient(to_string(player->getBalance()), clientSocket);
 
     this->sendMessageToClient(";endOfLoop", clientSocket);
 
@@ -473,12 +528,13 @@ void House::round(int clientSocket) {
 
 
 
-void House::getWinner(Player player, bool dealerWin, int clientSocket) {
+void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sharedData) {
+    ThreadData* threadData = (ThreadData*) sharedData;
     cout << "" << endl;
     cout << "--------GAME RECAP---------" << endl;
-    this->dealer.printDeck(true);
+    threadData->getDealer()->printDeck(true);
     this->sendMessageToClient("\n --------GAME RECAP--------- \n", clientSocket);
-    this->sendMessageToClient(this->dealer.printDeck(true), clientSocket);
+    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
 
         player.printDeck();
         this->sendMessageToClient(player.printDeck(), clientSocket);
@@ -497,7 +553,7 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
                 cout << "Hand 1: " << endl;
                 this->sendMessageToClient("\nHand 1: ", clientSocket);
             }
-            if (player.calculateValueOfHand() > this->dealer.calculateValueOfHand() && !player.isBust(false)) {
+            if (player.calculateValueOfHand() > threadData->getDealer()->calculateValueOfHand() && !player.isBust(false)) {
                 cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                 cout <<  "Total win: " << (player.getDeposit()*2) << endl;
                 this->sendMessageToClient(player.getName(), clientSocket);
@@ -513,7 +569,7 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
                 this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
 
 
-            } else if (player.calculateValueOfHand() == this->dealer.calculateValueOfHand() && !player.isBust(false)) {
+            } else if (player.calculateValueOfHand() == threadData->getDealer()->calculateValueOfHand() && !player.isBust(false)) {
                 cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
                 cout <<  "Total win: " << (player.getDeposit()) << endl;
                 player.updateBalance(player.getDeposit());
@@ -530,7 +586,7 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
                 this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
 
 
-            } else if (this->dealer.calculateValueOfHand() > 21 && !player.isBust(false)) {
+            } else if (threadData->getDealer()->calculateValueOfHand() > 21 && !player.isBust(false)) {
                 cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                 cout <<  "Total win: " << (player.getDeposit()*2) << endl;
                 this->sendMessageToClient(player.getName(), clientSocket);
@@ -551,7 +607,7 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
 
             if (player.getIsHandSplit()) {
 
-                if (player.calculateValueOfHandSplit() > this->dealer.calculateValueOfHand() && !player.isBust(true)) {
+                if (player.calculateValueOfHandSplit() > threadData->getDealer()->calculateValueOfHand() && !player.isBust(true)) {
                     cout << "Hand 2: " << endl;
                     cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                     cout <<  "Total win: " << (player.getDeposit()*2) << endl;
@@ -570,7 +626,7 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
                     this->sendMessageToClient("Total balance: ", clientSocket);
                     this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
 
-                } else if (player.calculateValueOfHandSplit() == this->dealer.calculateValueOfHand() && !player.isBust(true)) {
+                } else if (player.calculateValueOfHandSplit() == threadData->getDealer()->calculateValueOfHand() && !player.isBust(true)) {
                     cout << "Hand 2: " << endl;
                     cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
                     cout <<  "Total win: " << (player.getDeposit()) << endl;
@@ -588,7 +644,7 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
                     this->sendMessageToClient("Total balance: ", clientSocket);
                     this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
 
-                } else if (this->dealer.calculateValueOfHand() > 21 && !player.isBust(true)) {
+                } else if (threadData->getDealer()->calculateValueOfHand() > 21 && !player.isBust(true)) {
                     cout << "Hand 2: " << endl;
                     cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                     cout <<  "Total win: " << (player.getDeposit()*2) << endl;
@@ -622,7 +678,9 @@ void House::getWinner(Player player, bool dealerWin, int clientSocket) {
 
         player.removeCards();
 
-    this->dealer.removeCards();
+    std::unique_lock<std::mutex> lock(threadData->getMutex());
+    threadData->getDealer()->removeCards();
+    lock.unlock();
 }
 
 //void House::getPlayers() {
