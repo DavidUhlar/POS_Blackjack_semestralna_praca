@@ -12,7 +12,7 @@ int main() {
     cout << "klient" << endl;
 
 //    MySocket* mySocket = MySocket::createConnection("127.0.0.1", 8080);
-    MySocket* mySocket = MySocket::createConnection("frios2.fri.uniza.sk", 10227);
+    MySocket* mySocket = MySocket::createConnection("frios2.fri.uniza.sk", 10242);
 
     Client client;
 

@@ -59,7 +59,9 @@ void House::startListening(const char *ipAddress, int port, void* sharedData) {
             for (int i = 0; i < 2; ++i) {
                 this->sendMessageToClient("zacnitePiectTeraz", clientSockets.at(i));
                 threadData->getDealer()->addCard(threadData->getDealer()->handOutCard());
+
             }
+            threadData->setNotificationReady(false);
 
             for (int i = 0; i < 2; ++i) {
                 std::thread clientThread(&House::round, this, clientSockets.at(i), std::ref(threadData));
@@ -73,7 +75,13 @@ void House::startListening(const char *ipAddress, int port, void* sharedData) {
                 thread.join();
             }
         }
+
+        threadData->getDealer()->removeCards();
         close(serverSocket);
+
+        for (auto& sock : clientSockets) {
+            close(sock);
+        }
     }
 //    for (int i = 0; i < 2; ++i) {
 //        std::thread clientThread(&House::round, this, clientSockets.at(i), std::ref(threadData));
@@ -84,12 +92,6 @@ void House::startListening(const char *ipAddress, int port, void* sharedData) {
 
 }
 
-void House::handleClient(int clientSocket) {
-    // ... (existing code for sending and receiving messages)
-
-    // Close the client socket when done
-    close(clientSocket);
-}
 
 void House::sendMessageToClient(const std::string& message, int clientSocket) {
     if (send(clientSocket, message.c_str(), message.size(), 0) == -1) {
@@ -230,6 +232,7 @@ void House::handingOutCards(Player& player, void* sharedData) {
 
 void House::round(int clientSocket, void* sharedData) {
     ThreadData* threadData = (ThreadData*) sharedData;
+
 //    this->receiveName(clientSocket);
 //    Player player;
     std::unique_ptr<Player> player = this->receiveName(clientSocket);
@@ -237,21 +240,6 @@ void House::round(int clientSocket, void* sharedData) {
     threadData->getDealer()->getGameDeckSize();
     this->makeDeposit(*player, clientSocket);
 
-
-
-//std::vector<std::thread> bettingThreads;
-//
-//    // Launch a thread for each player to place their bets
-//    for (auto& player : listOfPlayers) {
-//        bettingThreads.emplace_back(&Player::makeDeposit, player.get());
-//    }
-//
-//    // Wait for all the betting threads to finish
-//    for (auto& t : bettingThreads) {
-//        if (t.joinable()) {
-//            t.join();
-//        }
-//    }
 
 
 
@@ -264,19 +252,55 @@ void House::round(int clientSocket, void* sharedData) {
     this->sendMessageToClient("\n", clientSocket);
     this->sendMessageToClient("\n", clientSocket);
     this->sendMessageToClient("----------TABLE-----------\n", clientSocket);
+
     if (threadData->getDealer()->getGameDeckSize() >= 60) {
+
+        this->sendMessageToClient(threadData->getDealer()->printDeck(false), clientSocket);
+        cout << threadData->getDealer()->printDeck(false) << endl;
+
 
         std::unique_lock<std::mutex> lock(threadData->getMutex());
         this->handingOutCards(*player, threadData);
-        cout << threadData->getDealer()->printDeck(false) << endl;
-        this->sendMessageToClient(threadData->getDealer()->printDeck(false), clientSocket);
+
+
         lock.unlock();
+
+
+//        for (const auto& entry : threadData->getPlayerCards()) {
+//            this->sendMessageToClient(entry.second, clientSocket);
+//        }
+
+        cout << "VELKOSTKO " << threadData->getPlayerCards().size() << endl;
+
+//        threadData->getThreadCounter()++;
+//        threadData->setPlayer1output(player->printDeck());
+//        threadData->getConditionVariable().notify_all();
+//        threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadCounter() == 2; });
+        std::unique_lock<std::mutex> lockIt(threadData->getMutex());
+
+        threadData->getThreadReady()++;
+        threadData->setPlayerCards(player->getName(), player->printDeck());
+        if (threadData->getThreadReady() == 2) {
+
+            threadData->setNotificationReady(true);
+            threadData->getConditionVariableNotification().notify_all();
+        } else {
+
+            threadData->getConditionVariableNotification().wait(lockIt, [&] { return threadData->getNotificationReady(); });
+        }
+
+        lockIt.unlock();
+
+        for (const auto& entry : threadData->getPlayerCards()) {
+            const std::string& playerCards = entry.second;
+
+            this->sendMessageToClient(playerCards, clientSocket);
+        }
 
         player->setBust(false, true);
         player->setBust(false, false);
         player->setFirstMove(false);
-        player->printDeck();
-        this->sendMessageToClient(player->printDeck(), clientSocket);
+
 
         this->numberOfRound++;
     } else {
@@ -306,7 +330,10 @@ void House::round(int clientSocket, void* sharedData) {
 
         while (!koniec)
         {
+            std::unique_lock<std::mutex> lock(threadData->getMutex());
+
             this->sendMessageToClient( threadData->getDealer()->printDeck(false), clientSocket);
+            lock.unlock();
             this->sendMessageToClient( player->printDeck(), clientSocket);
 
             if (player->calculateValueOfHand() == 21) {
@@ -453,22 +480,33 @@ void House::round(int clientSocket, void* sharedData) {
 
 
     //posledne ked hraci dovyberaju
-    std::unique_lock<std::mutex> lock(threadData->getMutex());
+//    {
+//    std::unique_lock<std::mutex> lock(threadData->getMutex());
+//    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
+//    lock.unlock();
+//    }
+
     this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
-    lock.unlock();
+
 
     int countBust = 0;
 
-        if (player->isBust(false)) {
-            countBust++;
-        }
+    if (player->isBust(false)) {
+        countBust++;
 
-        if (player->isBust(true)) {
-            countBustSplit++;
-        }
+    }
 
+    if (player->isBust(true)) {
+        countBustSplit++;
+    }
 
+    this->sendMessageToClient("end of game \n", clientSocket);
 
+    std::unique_lock<std::mutex> lock(threadData->getMutex());
+    threadData->getThreadCounter()++;
+    threadData->getConditionVariable().notify_all();
+    threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadCounter() == 2; });
+    lock.unlock();
 
     if ((countBustSplit == countBustSplitSize) && (countBustSplitSize > 0)) {
         cout << "DEALER WINS after split " << endl;
@@ -499,7 +537,7 @@ void House::round(int clientSocket, void* sharedData) {
             if (dealerWin) {
                 cout << "DEALER WINS" << endl;
                 this->sendMessageToClient("DEALER WINS \n", clientSocket);
-                this->getWinner(*player, dealerWin, clientSocket, threadData);
+//                this->getWinner(*player, dealerWin, clientSocket, threadData);
                 break;
             }
             std::unique_lock<std::mutex> lock(threadData->getMutex());
@@ -511,7 +549,12 @@ void House::round(int clientSocket, void* sharedData) {
     cout << "\nend of game" << endl;
     this->sendMessageToClient("end of game \n", clientSocket);
 
-    this->getWinner(*player, false, clientSocket, sharedData);
+
+
+
+
+
+    this->getWinner(*player, false, clientSocket, threadData);
 
     cout << "" << endl;
     cout << "Actuall balance: " << endl;
@@ -534,14 +577,18 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
     cout << "--------GAME RECAP---------" << endl;
     threadData->getDealer()->printDeck(true);
     this->sendMessageToClient("\n --------GAME RECAP--------- \n", clientSocket);
-    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
 
-        player.printDeck();
-        this->sendMessageToClient(player.printDeck(), clientSocket);
-        if (player.getIsHandSplit()) {
-            player.printDeckSplit();
-            this->sendMessageToClient(player.printDeckSplit(), clientSocket);
-        }
+    std::unique_lock<std::mutex> lock(threadData->getMutex());
+    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
+    lock.unlock();
+
+
+    player.printDeck();
+    this->sendMessageToClient(player.printDeck(), clientSocket);
+    if (player.getIsHandSplit()) {
+        player.printDeckSplit();
+        this->sendMessageToClient(player.printDeckSplit(), clientSocket);
+    }
 
 
     cout << "" << endl;
@@ -678,9 +725,9 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
 
         player.removeCards();
 
-    std::unique_lock<std::mutex> lock(threadData->getMutex());
-    threadData->getDealer()->removeCards();
-    lock.unlock();
+//    std::unique_lock<std::mutex> lock(threadData->getMutex());
+//    threadData->getDealer()->removeCards();
+//    lock.unlock();
 }
 
 //void House::getPlayers() {
