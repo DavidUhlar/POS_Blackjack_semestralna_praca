@@ -1,20 +1,23 @@
 CC = g++
-CFLAGS = -Wall -pthread -std=c++11
+CFLAGS = -Wall -pthread -std=c++17
+LDFLAGS =
 
 .PHONY: all clean client server
 
 all: server client
 
+SERVER_DIR := Server
+CLIENT_DIR := Client
 
-SERVER_CPP = server/Card.cpp server/Dealer.cpp server/gameDecks.cpp server/House.cpp server/main.cpp server/Player.cpp server/ThreadData.cpp
-SERVER_HEADERS = $(wildcard server/*.h)
-server: $(SERVER_CPP) $(SERVER_HEADERS)
-	$(CC) $(CFLAGS) $(SERVER_CPP) -o serverApp
+SERVER_SRC := $(wildcard $(SERVER_DIR)/*.cpp)
+SERVER_HEADERS := $(wildcard $(SERVER_DIR)/*.h)
+server: $(SERVER_SRC) $(SERVER_HEADERS)
+	$(CC) $(CFLAGS) $(SERVER_SRC) -o serverApp $(LDFLAGS)
 
-CLIENT_CPP = client/Client.cpp client/main_client.cpp client/my_socket.cpp
-CLIENT_HEADERS = $(wildcard client/*.h)
-client: $(CLIENT_CPP) $(CLIENT_HEADERS)
-	$(CC) $(CFLAGS) $(CLIENT_CPP) -o clientApp
+CLIENT_SRC := $(wildcard $(CLIENT_DIR)/*.cpp)
+CLIENT_HEADERS := $(wildcard $(CLIENT_DIR)/*.h)
+client: $(CLIENT_SRC) $(CLIENT_HEADERS)
+	$(CC) $(CFLAGS) $(CLIENT_SRC) -o clientApp $(LDFLAGS)
 
 clean:
-	rm -f clientApp serverApp client/*.o server/*.o
+	rm -f clientApp serverApp $(CLIENT_DIR)/*.o $(SERVER_DIR)/*.o

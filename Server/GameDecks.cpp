@@ -1,6 +1,7 @@
 
 #include "GameDecks.h"
-
+#include <memory>
+#include <filesystem>
 
 GameDecks::GameDecks() {
 
