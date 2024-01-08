@@ -6,15 +6,16 @@ CFLAGS = -Wall -pthread -std=c++11
 all: server client
 
 
-SERVER_CPP = server/Card.cpp server/Dealer.cpp server/gameDecks.cpp server/House.cpp server/main.cpp server/Player.cpp server/ThreadData.cpp
-SERVER_HEADERS = $(wildcard server/*.h)
+SERVER_CPP = Server/Card.cpp Server/Dealer.cpp Server/gameDecks.cpp Server/House.cpp Server/main.cpp Server/Player.cpp Server/ThreadData.cpp
+SERVER_HEADERS = $(wildcard Server/*.h)
 server: $(SERVER_CPP) $(SERVER_HEADERS)
 	$(CC) $(CFLAGS) $(SERVER_CPP) -o serverApp
 
-CLIENT_CPP = client/Client.cpp client/main_client.cpp client/my_socket.cpp
-CLIENT_HEADERS = $(wildcard client/*.h)
+CLIENT_CPP = Client/Client.cpp Client/main_client.cpp Client/my_socket.cpp
+CLIENT_HEADERS = $(wildcard Client/*.h)
 client: $(CLIENT_CPP) $(CLIENT_HEADERS)
 	$(CC) $(CFLAGS) $(CLIENT_CPP) -o clientApp
 
 clean:
-	rm -f clientApp serverApp client/*.o server/*.o
+	rm -f clientApp serverApp Client/*.o Server/*.o
+

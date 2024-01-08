@@ -3,6 +3,8 @@
 //
 
 #include "ThreadData.h"
+
+
 ThreadData::ThreadData(Dealer* pDealer) : dealer(pDealer) {
 
 }

@@ -7,6 +7,9 @@
 #include "Dealer.h"
 #include <mutex>
 #include <condition_variable>
+#include <unordered_map>
+
+using namespace std;
 
 class ThreadData {
 
