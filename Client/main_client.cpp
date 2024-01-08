@@ -12,7 +12,7 @@ int main() {
     cout << "klient" << endl;
 
 //    MySocket* mySocket = MySocket::createConnection("127.0.0.1", 8080);
-    MySocket* mySocket = MySocket::createConnection("frios2.fri.uniza.sk", 10243);
+    MySocket* mySocket = MySocket::createConnection("frios2.fri.uniza.sk", 10245);
 
     Client client;
 
@@ -23,13 +23,6 @@ int main() {
 
     while(end) {
 
-
-
-//        for (char c : message) {
-//            std::cout << "'" << c << "' ASCII: " << static_cast<int>(c) << std::endl;
-//        }
-//
-//        std::cout << "Message from server: [" << message << "], length: " << message.length() << std::endl;
 
         message = mySocket->receiveData();
         cout << message << endl;
@@ -44,9 +37,8 @@ int main() {
 
             mySocket->sendData(mySocket->serialize(output, name, 1000));
         }
-        // Process tokens directly without storing in a vector
+
         while (std::getline(ss, token, ';')) {
-            // Check if the current token is "specialMessage"
             if (token == "specialMessage") {
                 client.setDeposit();
                 mySocket->sendData(client.getDeposit());

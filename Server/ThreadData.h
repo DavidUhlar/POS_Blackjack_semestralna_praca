@@ -22,7 +22,8 @@ class ThreadData {
         void setReadyTreadyWinner();
         std::unordered_map<std::string, std::string>& getPlayerCards();
         void setPlayerCards(string playerName, const std::string& playerCards);
-
+        std::unordered_map<std::string, std::string>& getWinners();
+        void setWinners(string playerName, const std::string& amount);
 
 
     private:
@@ -33,6 +34,8 @@ class ThreadData {
         int readyThreads=0;
         int winnerReadyTready=0;
         std::unordered_map<string, std::string> playerCardsMap;
+        std::unordered_map<string, std::string> winnersMap;
+
 
 };
 

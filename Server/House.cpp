@@ -15,80 +15,71 @@ void House::startListening(const char *ipAddress, int port, void* sharedData) {
 
     this->serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
-    // Set up server address struct
     memset(&serverAddr, 0, sizeof(this->serverAddr));
     this->serverAddr.sin_family = AF_INET;
     this->serverAddr.sin_port = htons(port);
 
-    // Set the IP address to the desired value
     inet_pton(AF_INET, ipAddress, &(this->serverAddr.sin_addr));
 
-    // Bind socket to address
     bind(this->serverSocket, (struct sockaddr*)&serverAddr, sizeof(this->serverAddr));
 
-    // Listen for incoming connections
     listen(this->serverSocket, 5);
 
-        // Accept connection
-//        this->clientAddrLen = sizeof(clientAddr);
-//        this->clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
 
     int connectedClients = 0;
-    while(true) {
+    bool cyklus = true;
+    while(cyklus) {
         while (connectedClients < 2) {
-            // Accept connection
-            this->clientAddrLen = sizeof(clientAddr);
-            int newClientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
+            this->clientAddrLen = sizeof(this->clientAddr);
+            int newClientSocket = accept(this->serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
 
             if (newClientSocket != -1) {
-                // Start a new thread to handle the client
-    //            std::thread clientThread(&House::round, this, newClientSocket);
 
-                clientSockets.push_back(newClientSocket);
-    //            std::thread clientThread(&House::round, this, newClientSocket, std::ref(threadData));
-    //            clientThreads.push_back(std::move(clientThread));
-
-
-
+                this->clientSockets.push_back(newClientSocket);
             }
             connectedClients++;
             cout << connectedClients << endl;
         }
 
+
+
+
+
+        threadData->getDealer()->removeCards();
+        threadData->setReadyTready();
+        threadData->setReadyTreadyWinner();
+        threadData->getPlayerCards().clear();
+        threadData->getWinners().clear();
+
         if (connectedClients == 2) {
             for (int i = 0; i < 2; ++i) {
-                this->sendMessageToClient("zacnitePiectTeraz", clientSockets.at(i));
+                this->sendMessageToClient("zacnitePiectTeraz", this->clientSockets.at(i));
                 threadData->getDealer()->addCard(threadData->getDealer()->handOutCard());
 
             }
 
 
             for (int i = 0; i < 2; ++i) {
-                std::thread clientThread(&House::round, this, clientSockets.at(i), std::ref(threadData));
-                clientThreads.push_back(std::move(clientThread));
+                std::thread clientThread(&House::round, this, this->clientSockets.at(i), std::ref(threadData));
+                this->clientThreads.push_back(std::move(clientThread));
             }
         }
 
-        for (auto& thread : clientThreads) {
+
+        for (auto& thread : this->clientThreads) {
             if (thread.joinable()) {
                 thread.join();
             }
         }
 
         threadData->getDealer()->removeCards();
-        close(serverSocket);
 
-        for (auto& sock : clientSockets) {
+        close(this->serverSocket);
+        cyklus = false;
+        for (auto& sock : this->clientSockets) {
             close(sock);
         }
     }
-//    for (int i = 0; i < 2; ++i) {
-//        std::thread clientThread(&House::round, this, clientSockets.at(i), std::ref(threadData));
-//        clientThread.detach();
-//        clientThreads.push_back(std::move(clientThread));
-//    }
-//
-
 }
 
 
@@ -104,7 +95,6 @@ string House::receiveInputFromClient(int clientSocket) {
 
     memset(buffer, 0, sizeof(buffer));
 
-    // Receive data from client
     recv(clientSocket, buffer, sizeof(buffer), 0);
     input += buffer;
 
@@ -125,10 +115,8 @@ void House::makeDeposit(Player& player, int clientSocket) {
         this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
         this->sendMessageToClient("): ", clientSocket);
         this->sendMessageToClient(";specialMessage", clientSocket);
-        //        cout << "Leave with: leave " << endl;
 
         try {
-//            cin >> in;
 
             in = this->receiveInputFromClient(clientSocket);
 
@@ -192,8 +180,6 @@ std::unique_ptr<Player> House::receiveName(int clientSocket) {
 
 
     auto regina = std::make_unique<Player>(name, balance);
-//    this->pushPlayer(std::move(regina));
-
     return regina;
 
 }
@@ -224,9 +210,6 @@ void House::handingOutCards(Player& player, void* sharedData) {
 
 }
 
-//void House::pushPlayer(unique_ptr<Player> player) {
-//    this->listOfPlayers.emplace_back(std::move(player));
-//}
 
 
 void House::round(int clientSocket, void* sharedData) {
@@ -236,7 +219,7 @@ void House::round(int clientSocket, void* sharedData) {
 //    Player player;
     std::unique_ptr<Player> player = this->receiveName(clientSocket);
     //cout << "velkost balicka: " << this->dealer.getGameDeckSize() << endl;
-    threadData->getDealer()->getGameDeckSize();
+//    threadData->getDealer()->getGameDeckSize();
     this->makeDeposit(*player, clientSocket);
 
 
@@ -258,6 +241,7 @@ void House::round(int clientSocket, void* sharedData) {
         cout << threadData->getDealer()->printDeck(false) << endl;
 
 
+        {
         std::unique_lock<std::mutex> lock(threadData->getMutex());
         this->handingOutCards(*player, threadData);
 
@@ -271,10 +255,7 @@ void House::round(int clientSocket, void* sharedData) {
         threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadReady() == 2; });
 
         lock.unlock();
-
-
-
-
+        }
 
         for (const auto& entry : threadData->getPlayerCards()) {
             const std::string& playerCards = entry.second;
@@ -287,7 +268,6 @@ void House::round(int clientSocket, void* sharedData) {
         player->setFirstMove(false);
 
 
-        this->numberOfRound++;
     } else {
         cout << "je koniec" << endl;
     }
@@ -315,11 +295,11 @@ void House::round(int clientSocket, void* sharedData) {
 
         while (!koniec)
         {
-            std::unique_lock<std::mutex> lock(threadData->getMutex());
+
 
             this->sendMessageToClient( threadData->getDealer()->printDeck(false), clientSocket);
-            lock.unlock();
             this->sendMessageToClient( player->printDeck(), clientSocket);
+
 
             if (player->calculateValueOfHand() == 21) {
                 cout << "BLACKJACK" << endl;
@@ -483,12 +463,14 @@ void House::round(int clientSocket, void* sharedData) {
 
     this->sendMessageToClient("end of game \n", clientSocket);
 
+    {
     std::unique_lock<std::mutex> lock(threadData->getMutex());
     threadData->getThreadCounter()++;
     threadData->getConditionVariable().notify_all();
-    threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadCounter() == 2; });
     threadData->getPlayerCards().clear();
+    threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadCounter() == 2; });
     lock.unlock();
+    }
 
     if ((countBustSplit == countBustSplitSize) && (countBustSplitSize > 0)) {
         cout << "DEALER WINS after split " << endl;
@@ -519,7 +501,6 @@ void House::round(int clientSocket, void* sharedData) {
             if (dealerWin) {
                 cout << "DEALER WINS" << endl;
                 this->sendMessageToClient("DEALER WINS \n", clientSocket);
-//                this->getWinner(*player, dealerWin, clientSocket, threadData);
                 break;
             }
             std::unique_lock<std::mutex> lock(threadData->getMutex());
@@ -533,26 +514,12 @@ void House::round(int clientSocket, void* sharedData) {
 
 
 
-//    std::unique_lock<std::mutex> lockIt(threadData->getMutex());
-//
-//    threadData->setReadyTreadyWinner();
-//    threadData->getPlayerCards().clear();
-//    lockIt.unlock();
-
-
     this->getWinner(*player, false, clientSocket, threadData);
 
     cout << "" << endl;
-    cout << "Actuall balance: " << endl;
-    string balanceOutput = "\nActuall balance: \n" + player->getName() + ": " + to_string(player->getBalance()) + "\n";
-    //this->sendMessageToClient("\nActuall balance: \n", clientSocket);
-//
-//    cout << player->getName() << " " << player->getBalance() << endl;
-//    this->sendMessageToClient(player->getName(), clientSocket);
-//    this->sendMessageToClient("\n", clientSocket);
-//    this->sendMessageToClient(to_string(player->getBalance()), clientSocket);
+//    cout << "Actuall balance: " << endl;
+//    string balanceOutput = "\nActuall balance: " + player->getName() + ": " + to_string(player->getBalance()) + "\n";
 
-    this->sendMessageToClient(balanceOutput, clientSocket);
     this->sendMessageToClient(";endOfLoop", clientSocket);
 
 }
@@ -567,13 +534,21 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
     this->sendMessageToClient("\n --------GAME RECAP--------- \n", clientSocket);
 
 
-    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
 
-
+    {
+    string splitOutput;
+    if (player.getIsHandSplit()) {
+        splitOutput = player.printDeck() + "\n" + player.printDeckSplit();
+    }
     std::unique_lock<std::mutex> lock(threadData->getMutex());
-
+    this->sendMessageToClient(threadData->getDealer()->printDeck(true), clientSocket);
+    threadData->setReadyTready();
     threadData->getThreadReadyWinner()++;
-    threadData->setPlayerCards(player.getName(), player.printDeck());
+        if (player.getIsHandSplit()) {
+            threadData->setPlayerCards(player.getName(), splitOutput);
+        } else {
+            threadData->setPlayerCards(player.getName(), player.printDeck());
+        }
 
 
     if (threadData->getThreadReadyWinner() == 2) {
@@ -583,7 +558,7 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
     threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadReadyWinner() == 2; });
 
     lock.unlock();
-
+    }
 
 
     for (const auto& entry : threadData->getPlayerCards()) {
@@ -592,8 +567,6 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
     }
 
 
-//    player.printDeck();
-//    this->sendMessageToClient(player.printDeck(), clientSocket);
     if (player.getIsHandSplit()) {
         player.printDeckSplit();
         this->sendMessageToClient(player.printDeckSplit(), clientSocket);
@@ -605,145 +578,128 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
     this->sendMessageToClient("\n --------WINNERS--------- \n", clientSocket);
     if (!dealerWin) {
 
-            if (player.getIsHandSplit()) {
-                cout << "Hand 1: " << endl;
-                this->sendMessageToClient("\nHand 1: ", clientSocket);
-            }
-            if (player.calculateValueOfHand() > threadData->getDealer()->calculateValueOfHand() && !player.isBust(false)) {
+        string output;
+        output = "\nActuall balance: \n" + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+
+
+
+        if (player.getIsHandSplit()) {
+            cout << "Hand 1: " << endl;
+            this->sendMessageToClient("\nHand 1: ", clientSocket);
+        }
+        if (player.calculateValueOfHand() > threadData->getDealer()->calculateValueOfHand() && !player.isBust(false)) {
+            cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
+            cout <<  "Total win: " << (player.getDeposit()*2) << endl;
+
+            player.updateBalance(player.getDeposit()*2);
+            output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n" + "Actuall balance: " + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+
+            cout << output << endl;
+
+
+        } else if (player.calculateValueOfHand() == threadData->getDealer()->calculateValueOfHand() && !player.isBust(false)) {
+            cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
+            cout <<  "Total win: " << (player.getDeposit()) << endl;
+            player.updateBalance(player.getDeposit());
+            cout <<  "Total balance: " << (player.getBalance()) << endl;
+
+
+
+            output = player.getName() + " " + to_string(player.getDeposit()) + " x1\n" + "Total win: " + to_string((player.getDeposit())) + "\n" + "Actuall balance: " + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+            cout << output << endl;
+
+        } else if (threadData->getDealer()->calculateValueOfHand() > 21 && !player.isBust(false)) {
+            cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
+            cout <<  "Total win: " << (player.getDeposit()*2) << endl;
+
+
+
+            player.updateBalance(player.getDeposit()*2);
+            output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n" + "Actuall balance: " + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+            cout << output << endl;
+            cout <<  "Total balance: " << (player.getBalance()) << endl;
+        }
+
+        //pre split
+
+        if (player.getIsHandSplit()) {
+
+            if (player.calculateValueOfHandSplit() > threadData->getDealer()->calculateValueOfHand() && !player.isBust(true)) {
+                cout << "Hand 2: " << endl;
                 cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                 cout <<  "Total win: " << (player.getDeposit()*2) << endl;
-                string output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n";
-                this->sendMessageToClient(player.getName(), clientSocket);
-                this->sendMessageToClient(" ", clientSocket);
-                this->sendMessageToClient(to_string(player.getDeposit()), clientSocket);
-                this->sendMessageToClient(" x2\n", clientSocket);
-                this->sendMessageToClient("Total win: ", clientSocket);
-                this->sendMessageToClient(to_string((player.getDeposit()*2)), clientSocket);
-//                this->sendMessageToClient(output, clientSocket);
 
-                cout << output << endl;
+                this->sendMessageToClient("Hand 2: \n", clientSocket);
+
+
                 player.updateBalance(player.getDeposit()*2);
-//                cout <<  "Total balance: " << (player.getBalance()) << endl;
-//                this->sendMessageToClient("Total balance: ", clientSocket);
-//                this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
+                cout <<  "Total balance: " << (player.getBalance()) << endl;
 
+                output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n" + + "Actuall balance: " + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+                cout << output << endl;
 
-            } else if (player.calculateValueOfHand() == threadData->getDealer()->calculateValueOfHand() && !player.isBust(false)) {
+            } else if (player.calculateValueOfHandSplit() == threadData->getDealer()->calculateValueOfHand() && !player.isBust(true)) {
+                cout << "Hand 2: " << endl;
                 cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
                 cout <<  "Total win: " << (player.getDeposit()) << endl;
                 player.updateBalance(player.getDeposit());
                 cout <<  "Total balance: " << (player.getBalance()) << endl;
 
-                this->sendMessageToClient(player.getName(), clientSocket);
-                this->sendMessageToClient(" ", clientSocket);
-                this->sendMessageToClient(to_string(player.getDeposit()), clientSocket);
-                this->sendMessageToClient(" x1\n", clientSocket);
-                this->sendMessageToClient("Total win: ", clientSocket);
-                this->sendMessageToClient(to_string((player.getDeposit())), clientSocket);
+                this->sendMessageToClient("Hand 2: \n", clientSocket);
 
-                string output = player.getName() + " " + to_string(player.getDeposit()) + " x1\n" + "Total win: " + to_string((player.getDeposit())) + "\n";
-//                this->sendMessageToClient(output, clientSocket);
-//                this->sendMessageToClient("Total balance: ", clientSocket);
-//                this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
+                output = player.getName() + " " + to_string(player.getDeposit()) + " x1\n" + "Total win: " + to_string((player.getDeposit())) + "\n" + + "Actuall balance: " + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+
                 cout << output << endl;
 
-            } else if (threadData->getDealer()->calculateValueOfHand() > 21 && !player.isBust(false)) {
+            } else if (threadData->getDealer()->calculateValueOfHand() > 21 && !player.isBust(true)) {
+                cout << "Hand 2: " << endl;
                 cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
                 cout <<  "Total win: " << (player.getDeposit()*2) << endl;
-                this->sendMessageToClient(player.getName(), clientSocket);
-                this->sendMessageToClient(" ", clientSocket);
-                this->sendMessageToClient(to_string(player.getDeposit()), clientSocket);
-                this->sendMessageToClient(" x2\n", clientSocket);
-                this->sendMessageToClient("Total win: ", clientSocket);
-                this->sendMessageToClient(to_string((player.getDeposit()*2)), clientSocket);
 
+                this->sendMessageToClient("Hand 2: ", clientSocket);
 
-                string output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n";
-//                this->sendMessageToClient(output, clientSocket);
-                cout << output << endl;
 
                 player.updateBalance(player.getDeposit()*2);
                 cout <<  "Total balance: " << (player.getBalance()) << endl;
 
-//                this->sendMessageToClient("Total balance: ", clientSocket);
-//                this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
+                output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n" + "Actuall balance: " + player.getName() + ": " + to_string(player.getBalance()) + "\n";
+
+                cout << output << endl;
+
+            }
+        }
+        player.setDeposit(0);
+
+
+
+        {
+            std::unique_lock<std::mutex> lock(threadData->getMutex());
+
+
+            threadData->getThreadReady()++;
+            threadData->setWinners(player.getName(), output);
+
+            if (threadData->getThreadReady() == 2) {
+                threadData->getConditionVariable().notify_all();
             }
 
-            //pre split
+            threadData->getConditionVariable().wait(lock, [&] { return threadData->getThreadReady() == 2; });
 
-            if (player.getIsHandSplit()) {
+            lock.unlock();
+        }
 
-                if (player.calculateValueOfHandSplit() > threadData->getDealer()->calculateValueOfHand() && !player.isBust(true)) {
-                    cout << "Hand 2: " << endl;
-                    cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
-                    cout <<  "Total win: " << (player.getDeposit()*2) << endl;
 
-                    this->sendMessageToClient("Hand 2: \n", clientSocket);
-                    this->sendMessageToClient(player.getName(), clientSocket);
-                    this->sendMessageToClient(" ", clientSocket);
-                    this->sendMessageToClient(to_string(player.getDeposit()), clientSocket);
-                    this->sendMessageToClient(" x2\n", clientSocket);
-                    this->sendMessageToClient("Total win: ", clientSocket);
-                    this->sendMessageToClient(to_string((player.getDeposit()*2)), clientSocket);
 
-                    player.updateBalance(player.getDeposit()*2);
-                    cout <<  "Total balance: " << (player.getBalance()) << endl;
 
-                    string output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n";
-//                    this->sendMessageToClient(output, clientSocket);
-//                    this->sendMessageToClient("Total balance: ", clientSocket);
-//                    this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
-                    cout << output << endl;
-
-                } else if (player.calculateValueOfHandSplit() == threadData->getDealer()->calculateValueOfHand() && !player.isBust(true)) {
-                    cout << "Hand 2: " << endl;
-                    cout << player.getName() << " " << player.getDeposit() << " x1" << endl;
-                    cout <<  "Total win: " << (player.getDeposit()) << endl;
-                    player.updateBalance(player.getDeposit());
-                    cout <<  "Total balance: " << (player.getBalance()) << endl;
-
-                    this->sendMessageToClient("Hand 2: \n", clientSocket);
-                    this->sendMessageToClient(player.getName(), clientSocket);
-                    this->sendMessageToClient(" ", clientSocket);
-                    this->sendMessageToClient(to_string(player.getDeposit()), clientSocket);
-                    this->sendMessageToClient(" x1\n", clientSocket);
-                    this->sendMessageToClient("Total win: ", clientSocket);
-                    this->sendMessageToClient(to_string((player.getDeposit())), clientSocket);
-//
-//                    this->sendMessageToClient("Total balance: ", clientSocket);
-//                    this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
-                    string output = player.getName() + " " + to_string(player.getDeposit()) + " x1\n" + "Total win: " + to_string((player.getDeposit())) + "\n";
-//                    this->sendMessageToClient(output, clientSocket);
-                    cout << output << endl;
-
-                } else if (threadData->getDealer()->calculateValueOfHand() > 21 && !player.isBust(true)) {
-                    cout << "Hand 2: " << endl;
-                    cout << player.getName() << " " << player.getDeposit() << " x2" << endl;
-                    cout <<  "Total win: " << (player.getDeposit()*2) << endl;
-
-                    this->sendMessageToClient("Hand 2: ", clientSocket);
-                    this->sendMessageToClient(player.getName(), clientSocket);
-                    this->sendMessageToClient(" ", clientSocket);
-                    this->sendMessageToClient(to_string(player.getDeposit()), clientSocket);
-                    this->sendMessageToClient(" x2\n", clientSocket);
-                    this->sendMessageToClient("Total win: ", clientSocket);
-                    this->sendMessageToClient(to_string((player.getDeposit()*2)), clientSocket);
-
-                    player.updateBalance(player.getDeposit()*2);
-                    cout <<  "Total balance: " << (player.getBalance()) << endl;
-
-                    string output = player.getName() + " " + to_string(player.getDeposit()) + " x2\n" + "Total win: " + to_string((player.getDeposit()*2)) + "\n";
-//                    this->sendMessageToClient(output, clientSocket);
-//                    this->sendMessageToClient("Total balance: ", clientSocket);
-//                    this->sendMessageToClient(to_string(player.getBalance()), clientSocket);
-                    cout << output << endl;
-
-                }
-            }
-            player.setDeposit(0);
-
-            cout << "" << endl;
+        for (const auto& entry : threadData->getWinners()) {
+            const std::string& winners = entry.second;
             this->sendMessageToClient("\n", clientSocket);
+            this->sendMessageToClient(winners, clientSocket);
+        }
+
+
+        cout << "" << endl;
+        this->sendMessageToClient("\n", clientSocket);
 
     } else {
         cout << "DEALER WINS" << endl;
@@ -751,30 +707,17 @@ void House::getWinner(Player& player, bool dealerWin, int clientSocket, void* sh
     }
 
 
+
         player.removeCards();
 
-//    std::unique_lock<std::mutex> lock(threadData->getMutex());
-//    threadData->getDealer()->removeCards();
-//    lock.unlock();
 }
 
-//void House::getPlayers() {
-//    cout << "vypis playerov z housu" << endl;
-//    this->sendMessageToClient("vypis playerov z housu");
-//    for (auto& player: this->listOfPlayers) {
-//        cout << player->getName() << " " << player->getBalance()  << endl;
-//        this->sendMessageToClient(player->getName());
-//        this->sendMessageToClient(" ");
-//        this->sendMessageToClient(to_string(player->getBalance()));
-//    }
-//}
+
 
 
 
 House::~House() {
-    // Close sockets
-//    close(clientSocket);
-//    close(serverSocket);
+
 }
 
 

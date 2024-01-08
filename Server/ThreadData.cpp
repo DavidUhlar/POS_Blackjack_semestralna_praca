@@ -48,3 +48,11 @@ void ThreadData::setReadyTready() {
 void ThreadData::setReadyTreadyWinner() {
     winnerReadyTready = 0;
 }
+
+std::unordered_map<string, std::string>& ThreadData::getWinners() {
+    return winnersMap;
+}
+
+void ThreadData::setWinners(string playerName, const std::string& amount) {
+    winnersMap[playerName] = amount;
+}

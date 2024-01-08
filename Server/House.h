@@ -22,7 +22,6 @@ class House {
 public:
     House();
     void startListening(const char *ipAddress, int port, void* sharedData);
-    void handleClient(int clientSocket);
     void makeDeposit(Player& player, int clientSocket);
     std::unique_ptr<Player> receiveName(int clientSocket);
     void sendMessageToClient(const std::string& message, int clientSocket);
@@ -30,17 +29,12 @@ public:
     void giveCardSplit(Player& player, void* sharedData);
     void handingOutCards(Player& player, void* sharedData);
     void round(int clientSocket, void* sharedData);
-//    void pushPlayer(unique_ptr<Player> player);
     void getWinner(Player& player, bool dealerWin, int clientSocket, void* sharedData);
-//    void getPlayers();
     string receiveInputFromClient(int clientSocket);
     ~House();
 private:
-//    Dealer dealer;
-//    vector<unique_ptr<Player>> listOfPlayers;
-    int numberOfRound;
+
     int serverSocket;
-//    int clientSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen;
